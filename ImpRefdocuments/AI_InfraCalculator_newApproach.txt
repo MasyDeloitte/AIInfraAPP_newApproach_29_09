@@ -1,0 +1,883 @@
+ChatGPT Link - https://chatgpt.com/share/6abb93f5-fb84-83ee-919f-a7f83eaa1310
+
+I own a company and i need to setup an infra for the AI task we run in our company​‌
+
+we have almost 10TB of RAW Data ​‌
+almost 10000 users​‌
+may be like 3000-4000 peak concurrent users might use the AI features​‌
+
+our main use cases are as below and few percentage of users as mentioned in the blow percentage can use the AI features and low,medium and strong complexity / precision can be used by the users ​‌
+
+frauud analytics - Strong - 30%​‌
+Conversational AI - medium - 50% 
+RAG & Enterprise Search - medium - 70% 
+Document Intelligence - Strong - 40%
+Summarization / Batch and interactive inference - medium - 25-30%
+Agentic AI - strong - 80% 
+Code Generation - Strong - 50%​‌
+
+And we also want to use few Open source AI models and Paid AI models for our tasks​‌
+
+Such as ​‌
+free models - ​‌
+gemini-2.5-flash
+gemini-3.1-pro
+gpt-4o-mini
+gpt-4o
+deepseek-chat
+deepseek-reasoner
+qwen3.6-72b-instruct
+qwen-plus
+mistral-large-latest
+kimi-k2.7-code
+gemma-3-9b-it
+gemma-3-27b-it
+glm-4-plus
+glm-5-instruct
+whisper-1
+flux-2-dev​‌
+
+Paid Models​‌
+gpt-4o
+o1
+o3-mini
+claude-3-7-sonnet
+claude-3-5-opus
+gemini-2.5-pro
+deepseek-reasoner
+mistral-large-latest​‌
+
+
+
+I want to run all these models as suited for the use cases​‌
+
+I need u to Think as an AI infra engineer and help me calculate the required AI ON-Prem BOM for the AI infra which i am trying to Setup ​‌
+
+lets keep it interactive!
+
+
+here the Inputs should be 
+Total Raw data
+total users
+Active and Concurant users - 
+use cases - multiple use case selection + Complexity + % of number of users - this for all use cases
+Model selections - let the user select multiple Free models and Paid models as well
+
+
+and Output as per the templete
+
+
+==============================================================================================================================================================================================================
+1. Organisation and Planning
+Input	Entry / Selection	Required?	Why It Is NeededProject / Programme Name	[Text]	Yes	Identifies the sizing scenario
+Industry	[Dropdown]	Yes	Determines relevant use cases and governed defaults
+Deployment Preference	On-Premises / Cloud / Hybrid / Recommend Best Option	Yes	Determines infrastructure and costing model
+Primary Location	[Country / Data Centre]	Yes	Pricing, power and deployment constraints
+Planning Period	1 / 3 / 5 years	Yes	Calculates growth capacity and TCO
+Currency	INR / USD / Other	Yes	Financial reporting
+Annual Workload Growth	Default 20% / Override	Yes	Future compute and platform capacity
+Annual Data Growth	Default 20% / Override	Yes	Future storage capacity
+Pricing Basis	Budgetary / Quoted / Negotiated	Yes	Indicates confidence of financial output
+2. Users and Peak Demand
+Input	Entry / Selection	Required?	Why It Is NeededTotal Users	Example: 10,000	Yes	Establishes the organisation-wide user population
+Peak Concurrent Sessions	Example: 3,000–4,000	Yes	Primary input for interactive AI capacity
+Peak Usage Window	Example: 4 hours/day	Yes	Determines peak and sustained demand
+Working Days per Year	Example: 250	Yes	Calculates annual transaction volume
+Average AI Transactions per Active User per Day	[Number]	Yes	Calculates request and token volume
+Peak Concurrent Distribution Method	Automatic / Manual Override	Yes	Allocates concurrency across interactive use cases
+Important distinction
+Users Applicable to a Use Case % identifies who is eligible to use that AI capability.
+Peak Concurrent Distribution % allocates simultaneous sessions across interactive use cases.
+Use-case percentages may overlap and must not be added together as unique users.
+3. Use-Case Selection and Usage Profile
+
+Allow the executive to select multiple use cases.
+
+Use Case	Selected?	Complexity	Applicable Users %	Estimated Users	Peak Concurrent Distribution %Fraud Analytics	Yes / No	Simple / Medium / Strong	30%	Auto-calculated	
+Conversational AI	Yes / No	Simple / Medium / Strong	50%	Auto-calculated	
+RAG and Enterprise Search	Yes / No	Simple / Medium / Strong	70%	Auto-calculated	
+Document Intelligence	Yes / No	Simple / Medium / Strong	40%	Auto-calculated	
+Summarisation	Yes / No	Simple / Medium / Strong	25–30%	Auto-calculated	
+Batch Inference	Yes / No	Simple / Medium / Strong		Auto-calculated	Not applicable
+Interactive Inference	Yes / No	Simple / Medium / Strong		Auto-calculated	
+Agentic AI	Yes / No	Simple / Medium / Strong	80%	Auto-calculated	
+Code Generation	Yes / No	Simple / Medium / Strong	50%	Auto-calculated	
+Speech Transcription	Yes / No	Simple / Medium / Strong		Auto-calculated	
+Image Generation	Yes / No	Simple / Medium / Strong		Auto-calculated	
+Fine-Tuning	Yes / No	Simple / Medium / Strong	Not applicable	Not applicable	Not applicable
+Model Training	Yes / No	Simple / Medium / Strong	Not applicable	Not applicable	Not applicable
+Other	Yes / No	Simple / Medium / Strong		Auto-calculated	
+Complexity Usage Mix
+
+For every selected use case, collect a usage mix rather than only one complexity value.
+
+Use Case	Simple Usage %	Medium Usage %	Complex Usage %	Total[Selected use case]				100%
+Validation
+Plain Text
+Simple Usage % + Medium Usage % + Complex Usage % = 100%
+Show more lines
+
+Complexity should represent request difficulty. The system should automatically determine appropriate numerical precision based on model compatibility, memory requirements, expected performance and quality evidence.
+
+4. Workload Demand Inputs
+
+The demand unit must change depending on the selected use case.
+
+Workload Type	Executive Demand Input	Example UnitConversational AI	Transactions or conversations	Requests/day
+RAG and Enterprise Search	Search or question volume	Queries/day
+Fraud Analytics	Records or events analysed	Events/day
+Document Intelligence	Documents or pages processed	Pages/day
+Summarisation	Documents, files or meetings	Documents/day
+Batch Inference	Records or jobs processed	Records/day or jobs/day
+Agentic AI	Agent tasks or workflows	Tasks/day
+Code Generation	Coding requests	Requests/day
+Speech Processing	Audio volume	Audio hours/day
+Image Generation	Images generated	Images/day
+Fine-Tuning	Dataset size and runs	GB/TB and runs/year
+Model Training	Dataset size and training runs	TB and runs/year
+Demand Input Template
+Use Case	Demand Unit	Average Daily Volume	Peak Hourly Volume	Batch or Interactive	Processing SLA[Selected use case]	Auto-selected			Batch / Interactive / Both	
+
+Peak concurrent users should only be applied to interactive use cases. Batch, training, document-processing and fraud workloads should use their relevant workload units.
+
+5. Request and Response Profile
+
+Use governed dropdowns with clear descriptions. Allow advanced numeric overrides where necessary.
+
+Input	Executive Selection	Required?Typical Request	Short / Standard / Detailed / Large Document	Yes
+Supporting Context	None / Small / Medium / Large / Full Document	Yes
+Conversation History	None / Short / Medium / Long	For conversational workloads
+Expected Answer Type	Short Answer / Detailed Answer / Structured Output / Code / Report	Yes
+Tool or Agent Usage	None / Low / Medium / High	For agentic workloads
+Model Calls per Transaction	1 / 2 / 3 / 5 / Custom	Yes
+Prompt Caching Permitted	Yes / No / Application-Dependent	Yes
+Response Priority	Low Latency / Balanced / Maximum Throughput	Yes
+
+These values should drive:
+
+Input and output token estimation
+Context-window eligibility
+Requests per second
+Model calls and tool calls
+Model and precision selection
+KV-cache memory
+GPU memory fit
+GPU replicas and server quantities
+Platform and financial outputs
+6. Enterprise Data Profile
+6.1 Total Data
+Input	Entry / Selection	Required?Total Raw Data	Example: 10 TB	Yes
+Annual Data Growth	Default 20% / Override	Yes
+Data Retention Period	[Months / Years]	Yes
+Data Residency Requirement	On-Premises Only / Country Restricted / No Restriction	Yes
+Data Classification	Public / Internal / Confidential / Highly Restricted / Mixed	Yes
+Backup Retention	[Days / Months / Years]	Yes
+Archive Required	Yes / No	Yes
+6.2 Data Composition
+Data Type	Approximate Volume	Percentage of Total	Intended AI UsePDF and Office Documents			
+Scanned Documents			
+Databases and Tables			
+Logs and Events			
+Source Code			
+Images			
+Audio			
+Video			
+Other			
+Total	10 TB	100%	
+6.3 Language and File Coverage
+Input	SelectionLanguages Required	English / Indian Languages / Multiple Global Languages
+Primary Language	
+File Types	PDF / DOCX / PPTX / XLSX / CSV / HTML / TXT / Images / Audio / Video / Code
+Handwritten Content	None / Low / Medium / High
+Scanned Content	None / Low / Medium / High
+7. Conditional Data Inputs
+7.1 RAG and Enterprise Search
+
+Show this section only when RAG, enterprise search, document intelligence or knowledge workloads are selected.
+
+Input	Entry / Selection	Required?Knowledge Content Volume	GB / TB / Document Count / Page Count	Optional
+Percentage of Raw Data Used for RAG	[Percentage]	Optional
+Number of Documents	[Number]	Optional
+Average Document Size	[Pages or MB]	Optional
+Content Update Frequency	Real-Time / Hourly / Daily / Weekly / Monthly	Yes
+Search Availability Target	Business Hours / 24×7	Yes
+Knowledge Access Control	Common / Department-Based / User-Level	Yes
+
+If the user leaves these blank, apply a visible catalog default and show its source status and confidence.
+
+7.2 Training and Fine-Tuning
+
+Show this section only when training or fine-tuning is selected.
+
+Input	Entry / Selection	Required?Raw Training Dataset Size	GB / TB	Optional
+Dataset Modality	Text / Image / Audio / Video / Multimodal	Optional
+Training Type	Fine-Tuning / Continued Pre-Training / Full Training	Yes
+Expected Runs per Year	[Number]	Optional
+Preferred Completion Time	Hours / Days / Cost-Balanced	Optional
+Checkpoint Retention	[Number of checkpoints]	Optional
+
+Blank conditional inputs must not block sizing. The system should apply visible, governed fallback defaults.
+
+8. Model Selection
+
+The interface should distinguish self-hostable models from externally hosted API models. Selecting a model does not automatically mean it can be installed on-premises.
+
+8.1 Open-Weight / Self-Hosted Model Candidates
+Model	Select	Intended Use Case	Deployment Preference	Keep Continuously Loaded?DeepSeek family	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Qwen family	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Gemma 3 9B	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Gemma 3 27B	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Mistral open-weight family	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+GLM open-weight family	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Whisper open-weight model	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+FLUX open-weight model	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+Other	Yes / No		On-Premises / Cloud / Recommend	Yes / No
+8.2 Paid / Hosted Models
+Model Family	Select	Intended Use Case	Preferred ProviderOpenAI GPT models	Yes / No		Direct / Azure / Recommend
+OpenAI reasoning models	Yes / No		Direct / Azure / Recommend
+Anthropic Claude models	Yes / No		Direct / Cloud Provider / Recommend
+Google Gemini models	Yes / No		Google Cloud / API / Recommend
+DeepSeek hosted models	Yes / No		
+Mistral hosted models	Yes / No		
+Qwen hosted models	Yes / No		
+Other hosted model	Yes / No		
+8.3 Model Selection Strategy
+Input	SelectionModel Selection Approach	User Selected / System Recommended / Both
+Primary Optimisation Goal	Cost / Quality / Latency / Data Privacy / Balanced
+Permit Automatic Model Routing	Yes / No
+Permit Fallback Models	Yes / No
+Permit External APIs for Sensitive Data	Yes / No
+Maximum Number of On-Prem Models Loaded Simultaneously	Auto / Custom
+Model Override After Recommendation	Yes / No
+
+The sizing output should clearly identify:
+
+Selected model
+Recommended model
+On-premises or API placement
+Licence and availability status
+Selected precision
+GPU memory requirement
+Context-window eligibility
+Performance evidence
+Confidence
+Reason for model recommendation
+9. Availability, HA and Disaster Recovery
+Input	Selection	Required?Service Availability	99.5% / 99.9% / 99.95% / 99.99%	Yes
+Production Operating Window	Business Hours / 16×5 / 24×7	Yes
+High Availability Required	Yes / No	Yes
+DR Required	Yes / No	Yes
+DR Mode	Backup Only / Active-Passive / Active-Active	If DR selected
+Recovery Time Objective	1 / 4 / 8 / 24 / 48 hours	If DR selected
+Recovery Point Objective	Near-Zero / 15 Minutes / 1 / 4 / 24 Hours	If DR selected
+DR Compute Capacity	Automatic / Custom % of Production	If DR selected
+Planned Maintenance Window	Weekly / Monthly / Custom	Yes
+
+The system should derive extra HA servers and DR compute capacity from these selections. Approvals must not stop the sizing calculation.
+
+10. Network and Integration Requirements
+Input	Selection	Required?Existing Data-Centre Ethernet	10 / 25 / 40 / 100 / 200 / 400 GbE / Unknown	Yes
+Dedicated GPU Fabric Preference	Ethernet RoCE / InfiniBand / Recommend	Yes
+External Internet/API Connectivity	Existing / New / Unknown	Yes
+Dedicated Cloud Connectivity	Required / Not Required / Recommend	Yes
+Primary Enterprise Systems	ERP / CRM / Data Warehouse / Document Repository / Code Repository / Other	Yes
+Identity Provider	Microsoft Entra ID / Active Directory / Other	Yes
+Network Security Level	Standard / Restricted / Highly Segmented	Yes
+DR Replication Link	Existing / New / Recommend	If DR selected
+
+Network port counts, switch quantities, bandwidth and topology should be derived rather than manually entered by executives.
+
+11. Facility and Power Inputs
+Input	Selection / Entry	Required?Deployment Facility	Existing Data Centre / Colocation / New Facility	Yes
+Available Rack Space	Number of racks / Unknown	Yes
+Maximum Power per Rack	kW / Unknown	Yes
+Total Available IT Power	kW or MW / Unknown	Yes
+Cooling Type Available	Air / Direct Liquid / Hybrid / Unknown	Yes
+Available Cooling Capacity	kW / TR / Unknown	Optional
+Existing UPS Capacity	kVA / kW / Unknown	Optional
+Existing Generator Backup	Yes / No / Unknown	Yes
+Facility PUE	Value / Use Default	Optional
+Electricity Tariff	Currency per kWh / Use Local Default	Optional
+Facility Upgrade Allowed	Yes / No / Subject to Review	Yes
+
+Facility limitations should act as feasibility constraints. They should not silently reduce calculated AI capacity.
+
+12. Commercial and Support Inputs
+Input	Selection / Entry	Required?Preferred Server Vendors	Multiple Select / No Preference	Yes
+Preferred GPU Vendors	Multiple Select / No Preference	Yes
+Procurement Strategy	Single Purchase / Phased / Lease / Recommend	Yes
+Hardware Support	8×5 / 24×7 / 4-Hour Response	Yes
+Software Support	Community / Enterprise / Mixed	Yes
+Operating Model	Internal / OEM / Managed Service / Joint	Yes
+Implementation Model	Internal / Partner / OEM / Mixed	Yes
+Pricing Type	Budgetary / Vendor Quote / Negotiated	Yes
+Tax Treatment	Include / Exclude	Yes
+Contingency	Percentage / Use Default	Yes
+Hardware Refresh Cycle	3 / 4 / 5 Years	Yes
+13. Executive Overrides
+
+Place these under an Advanced Overrides section so they do not clutter the primary executive form.
+
+Override	Default BehaviourPreferred LLM	System recommends a suitable model
+Preferred GPU Vendor	System selects from compatible options
+Preferred GPU SKU	System selects using memory and benchmark fit
+GPUs per Server	System selects 4-GPU or 8-GPU configuration
+Number of GPU Servers	System calculates capacity
+Numerical Precision	System selects based on model compatibility
+Model Calls per Transaction	Derived from profile or user-provided value
+Peak Concurrent Distribution	Automatically distributed across applicable workloads
+DR Capacity Percentage	Derived from DR policy
+Storage Replication	Derived from availability and protection requirements
+Facility PUE	Uses governed regional or facility default
+Electricity Tariff	Uses governed local default
+Annual Growth	Defaults to 20%
+LLM After Recommendation	User can override and trigger full recalculation
+
+Every override should require an Override Reason and automatically recalculate all affected outputs.
+
+14. Crisp Executive Input Form
+
+This is the shortened version executives complete first.
+
+Section A: Business Scale
+Input	ValueIndustry	
+Total Raw Data	
+Total Users	
+Peak Concurrent Sessions	
+Planning Period	
+Annual Workload Growth	
+Annual Data Growth	
+Section B: Use Cases
+Use Case	Select	Applicable Users %	Simple %	Medium %	Complex %Fraud Analytics					
+Conversational AI					
+RAG and Enterprise Search					
+Document Intelligence					
+Summarisation					
+Batch Inference					
+Agentic AI					
+Code Generation					
+Speech / Image AI					
+Training / Fine-Tuning		N/A			
+Section C: Model Strategy
+Input	ValueSelect Open-Weight Models	Multiple selection
+Select Paid/API Models	Multiple selection
+Optimisation Goal	Cost / Quality / Latency / Privacy / Balanced
+Automatic Model Recommendation	Yes / No
+Automatic Model Routing	Yes / No
+Sensitive Data Permitted Outside Company	Yes / No
+Section D: Service Requirements
+Input	ValueAvailability Target	
+DR Requirement	
+Response Priority	Low Latency / Balanced / Throughput
+Operating Window	
+Data Residency	
+Deployment Preference	On-Premises / Cloud / Hybrid / Recommend
+Section E: Facility and Commercial
+Input	ValueExisting Data Centre	Yes / No
+Available Power	
+Cooling Type	
+Rack Space	
+Preferred Vendors	
+Support Level	
+Currency	
+Pricing Basis	
+Operating Model	Internal / Partner / Managed
+Final Design Principle
+
+The primary executive form should request only information the executive can reasonably know. The system should derive:
+
+Workload type and demand unit
+Effective concurrent requests
+Token volumes
+Tool calls
+Requests per second
+Time-to-first-token target
+Precision
+Model compatibility and eligibility
+GPU memory and KV-cache
+GPU replicas and server quantities
+Ethernet or InfiniBand architecture
+Storage, backup and DR capacity
+Platform licence quantities
+Labour and support effort
+Rack, power and cooling requirements
+CAPEX, OPEX and multi-year TCO
+
+Each derived result should show its assumption, calculation logic, evidence, confidence and affected BOM lines.
+
+==============================================================================================================================================================================================================
+
+
+1. Organisation and Planning - Basic details					
+					
+Input	Entry / Selection	Required?	Why It Is Needed		
+Project / Programme Name	[Text]	Yes	Identifies the sizing scenario		
+Industry	[Dropdown]	Yes	Determines relevant use cases and governed defaults		
+Primary Location	[Country / Data Centre]	Yes	Pricing, power and deployment constraints		
+Planning Period	1 / 3 / 5 years	Yes	Calculates growth capacity and TCO		
+Currency	INR / USD / Other	Yes	Financial reporting		
+Annual Workload Growth	Default 20% / Override	Yes	Future compute and platform capacity		
+Annual Data Growth	Default 20% / Override	Yes	Future storage capacity		
+Pricing Basis	Budgetary / Quoted / Negotiated	Yes	Indicates confidence of financial output		
+					
+					
+2. Users and Peak Demand					
+					
+Input	Entry / Selection	Required?	Why It Is Needed		
+Total Users	Example: 10,000	Yes	Establishes the organisation-wide user population		
+Peak Concurrent Sessions	Example: 3,000–4,000	Yes	Primary input for interactive AI capacity		
+Peak Usage Window	Example: 4 hours/day	Yes	Determines peak and sustained demand		
+Working Days per Year	Example: 250	Yes	Calculates annual transaction volume		
+Average AI Transactions per Active User per Day	[Number]	Yes	Calculates request and token volume		
+Peak Concurrent Distribution Method	Always Automatic	Yes	Always Automatic		
+					
+Note					
+					
+"Users Applicable to a Use Case % identifies who is eligible to use that AI capability.
+
+2)Peak Concurrent Distribution % allocates simultaneous sessions across interactive use cases.
+
+3)Use-case percentages may overlap and must not be added together as unique users."					
+3. Use-Case Selection and Usage Profile					
+					
+Allow the executive to select multiple use cases.					
+Use Case	Selected?	Complexity	Applicable Users %	Estimated Users	Peak Concurrent Distribution %
+Fraud Analytics	Yes / No	Simple / Medium / Strong	30%	Auto-calculated	
+Conversational AI	Yes / No	Simple / Medium / Strong	50%	Auto-calculated	
+RAG and Enterprise Search	Yes / No	Simple / Medium / Strong	70%	Auto-calculated	
+Document Intelligence	Yes / No	Simple / Medium / Strong	40%	Auto-calculated	
+Summarisation	Yes / No	Simple / Medium / Strong	25–30%	Auto-calculated	
+Batch Inference	Yes / No	Simple / Medium / Strong	80%	Auto-calculated	Not applicable
+Interactive Inference	Yes / No	Simple / Medium / Strong	80%	Auto-calculated	
+Agentic AI	Yes / No	Simple / Medium / Strong	20%	Auto-calculated	
+Code Generation	Yes / No	Simple / Medium / Strong	10%	Auto-calculated	
+Speech Transcription	Yes / No	Simple / Medium / Strong	25%	Auto-calculated	
+Image Generation	Yes / No	Simple / Medium / Strong	40%	Auto-calculated	
+Fine-Tuning	Yes / No	Simple / Medium / Strong	Not applicable	Not applicable	Not applicable
+Model Training	Yes / No	Simple / Medium / Strong	Not applicable	Not applicable	Not applicable
+6. Enterprise Data Profile					
+					
+6.1 Total Data					
+					
+Input	Entry / Selection	Required?			
+Total Raw Data	Example: 10 TB	Yes			
+Annual Data Growth	Default 20% / Override	Yes			
+Data Retention Period	[Months / Years]	Yes			
+Data Residency Requirement	On-Premises Only / Country Restricted / No Restriction	Yes			
+Data Classification	Public / Internal / Confidential / Highly Restricted / Mixed	Yes			
+Backup Retention	[Days / Months / Years]	Yes			
+Archive Required	Yes / No	Yes			
+					
+6.2 Data Composition	This will be used for Tocken estimation				
+					
+Data Type	Approximate Volume	Percentage of Total	Intended AI Use		
+PDF and Office Documents					
+Scanned Documents					
+Databases and Tables					
+Logs and Events					
+Source Code					
+Images					
+Audio					
+Video					
+Other					
+Total	10 TB	100%	Note - might not always equate to 100 % - the user will always guess these values aproximately - near accurate		
+					
+7.2 Training and Fine-Tuning					
+					
+Show this section only when training or fine-tuning is selected.					
+					
+Input	Entry / Selection	Required?			
+Raw Training Dataset Size	GB / TB	Optional			
+Dataset Modality	Text / Image / Audio / Video / Multimodal	Optional			
+Training Type	Fine-Tuning / Continued Pre-Training / Full Training	Yes			
+Expected Runs per Year	[Number]	Optional			
+Preferred Completion Time	Hours / Days / Cost-Balanced	Optional			
+Checkpoint Retention	[Number of checkpoints]	Optional			
+					
+Blank conditional inputs must not block sizing. The system should apply visible, governed fallback defaults.					
+					
+					
+					
+8. Model Selection					
+					
+The interface should distinguish self-hostable models from externally hosted API models. Selecting a model does not automatically mean it can be installed on-premises.					
+					
+8.1 Open-Weight / Self-Hosted Model Candidates	We should have a dropdown for all the AI models and mention FREE and Open source 				
+					
+Model	Select	Intended Use Case	Deployment Preference	Keep Continuously Loaded?	
+DeepSeek family	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Qwen family	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Gemma 3 9B	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Gemma 3 27B	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Mistral open-weight family	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+GLM open-weight family	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Whisper open-weight model	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+FLUX open-weight model	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+Other	Yes / No		On-Premises / Cloud / Recommend	Yes / No	
+					
+8.2 Paid / Hosted Models					
+					
+Model Family	Select	Intended Use Case	Preferred Provider		
+OpenAI GPT models	Yes / No		Direct / Azure / Recommend		
+OpenAI reasoning models	Yes / No		Direct / Azure / Recommend		
+Anthropic Claude models	Yes / No		Direct / Cloud Provider / Recommend		
+Google Gemini models	Yes / No		Google Cloud / API / Recommend		
+DeepSeek hosted models	Yes / No				
+Mistral hosted models	Yes / No				
+Qwen hosted models	Yes / No				
+Other hosted model	Yes / No				
+					
+8.3 Model Selection Strategy	Optional input 				
+					
+Input	Selection				
+Model Selection Approach	User Selected / System Recommended / Both				
+Primary Optimisation Goal	Cost / Quality / Latency / Data Privacy / Balanced				
+Permit Automatic Model Routing	Yes / No				
+Permit Fallback Models	Yes / No				
+Permit External APIs for Sensitive Data	Yes / No				
+Maximum Number of On-Prem Models Loaded Simultaneously	Auto / Custom				
+Model Override After Recommendation	Yes / No				
+					
+The sizing output should clearly identify:					
+					
+Selected model					
+Recommended model					
+On-premises or API placement					
+Licence and availability status					
+Selected precision					
+GPU memory requirement					
+Context-window eligibility					
+Performance evidence					
+Confidence					
+Reason for model recommendation					
+					
+					
+					
+9. Availability, HA and Disaster Recovery					
+					
+Input	Selection	Required?			
+Service Availability	99.5% / 99.9% / 99.95% / 99.99%	Yes			
+Production Operating Window	Business Hours / 16×5 / 24×7	Yes			
+High Availability Required	Yes / No	Yes			
+DR Required	Yes / No	Yes			
+DR Mode	Backup Only / Active-Passive / Active-Active	If DR selected			
+Recovery Time Objective	1 / 4 / 8 / 24 / 48 hours	If DR selected			
+Recovery Point Objective	Near-Zero / 15 Minutes / 1 / 4 / 24 Hours	If DR selected			
+DR Compute Capacity	Automatic / Custom % of Production	If DR selected			
+Planned Maintenance Window	Weekly / Monthly / Custom	Yes			
+					
+The system should derive extra HA servers and DR compute capacity from these selections. Approvals must not stop the sizing calculation.					
+
+
+==============================================================================================================================================================================================================
+
+
+											
+Layer	Recommended Capacity / Scope	Quantity	Initial CAPEX	Annual OPEX	3/5-Year TCO	% of TCO								
+GPU Compute	GPU servers, accelerators and GPU memory													
+CPU Compute	Application, database, management and processing servers													
+Storage	High-performance, object, vector, backup and archive storage													
+Ethernet Networking	Application, storage, management and external network													
+InfiniBand / GPU Fabric	GPU backend fabric, adapters, optics and cables													
+Platform Tools and Licences	Kubernetes, AI serving, MLOps, databases and security													
+Implementation Labour	Design, installation, integration, testing and training													
+Operations and Support	Internal operations, OEM support and managed services													
+Facility and Power	Racks, UPS, cooling, electricity and facility upgrades													
+Contingency	Commercial and implementation reserve													
+Total On-Premises BOM			₹ / $	₹ / $	₹ / $	100%								
+														
+Executive Capacity Summary														
+														
+KPI	Final Output													
+Total GPU Servers														
+Total GPUs														
+Total GPU Memory														
+Total CPU Servers														
+Total CPU Cores														
+Total System RAM														
+Total Raw Storage														
+Total Usable Storage														
+Ethernet Fabric Capacity														
+InfiniBand Fabric Capacity														
+Average IT Load														
+Maximum Facility Load														
+Production Capacity														
+HA Capacity														
+DR Capacity														
+Growth Headroom														
+														
+														
+2. On-Premises Component-Level BOM														
+														
+Standard Columns														
+														
+BOM ID	Category	Component	Make / Model / SKU	Specification	Unit	Prod. Qty	HA Qty	DR Qty	Growth Qty	Total Qty	Unit Price	Initial Cost	Annual Cost	TCO
+														
+A. Compute Components														
+														
+BOM ID	Component	Required Specification	Quantity	Initial Cost	Annual Cost	TCO								
+CMP-001	8-GPU servers	OEM, server SKU and GPU configuration												
+CMP-002	4-GPU servers	OEM, server SKU and GPU configuration												
+CMP-003	GPUs	GPU model, memory, precision and power												
+CMP-004	Host CPUs	CPU model, sockets and cores												
+CMP-005	System RAM	RAM per server and total RAM												
+CMP-006	Local NVMe	Model cache and processing workspace												
+CMP-007	GPU interconnect	NVLink, NVSwitch or equivalent												
+CMP-008	Ethernet adapters	Speed, ports and redundancy												
+CMP-009	InfiniBand adapters	Generation, speed and ports												
+CMP-010	DPUs / SmartNICs	Security and network offload												
+CMP-011	Application servers	CPU, RAM, storage and NIC configuration												
+CMP-012	Database servers	Memory-optimised server configuration												
+CMP-013	Management servers	Monitoring, logging and security												
+CMP-014	Control-plane servers	Container and cluster management												
+CMP-015	Development/Test servers	Non-production compute												
+CMP-016	Hardware spares	GPU, SSD, NIC, fan and PSU spares												
+CMP-017	Hardware support	Support level and duration												
+Compute Total				₹ / $	₹ / $	₹ / $								
+														
+B. Storage Components														
+														
+BOM ID	Component	Required Specification	Raw Capacity	Usable Capacity	Quantity	Initial Cost	Annual Cost	TCO						
+STG-001	High-performance storage	Active datasets and checkpoints												
+STG-002	Object storage	Raw and curated enterprise data												
+STG-003	Vector/index storage	Embeddings and search indexes												
+STG-004	Model repository	Model weights and artefacts												
+STG-005	Shared file storage	Platform and application files												
+STG-006	Backup storage	Operational backup												
+STG-007	Archive storage	Long-term retention												
+STG-008	DR storage	Replicated data												
+STG-009	Storage adapters	Speed and ports	N/A	N/A										
+STG-010	Storage switches	Port speed and count	N/A	N/A										
+STG-011	Storage software	Capacity-based licence	N/A											
+STG-012	Storage support	Support level and duration	N/A	N/A										
+Storage Total						₹ / $	₹ / $	₹ / $						
+														
+C. Networking Components														
+														
+BOM ID	Network	Component	Speed / Specification	Quantity	Initial Cost	Annual Cost	TCO							
+NET-001	Ethernet	Spine switches	100/200/400/800 GbE											
+NET-002	Ethernet	Leaf/Top-of-Rack switches	100/200/400/800 GbE											
+NET-003	Ethernet	Storage switches	Required port speed											
+NET-004	Ethernet	Management switches	1/10/25 GbE											
+NET-005	Ethernet	Ethernet NICs	Speed, ports and redundancy											
+NET-006	Ethernet	DPUs / SmartNICs	Model and speed											
+NET-007	Ethernet	Load balancers	Throughput and connections											
+NET-008	Ethernet	Firewalls	Throughput and session count											
+NET-009	Ethernet	WAN/Internet links	Bandwidth and redundancy											
+NET-010	InfiniBand	Spine switches	Generation and speed											
+NET-011	InfiniBand	Leaf switches	Generation and speed											
+NET-012	InfiniBand	Host channel adapters	Ports and speed											
+NET-013	InfiniBand	Fabric manager	Appliance or licence											
+NET-014	Physical	Optics and transceivers	Type and speed											
+NET-015	Physical	DAC/AOC/fibre cables	Type, speed and length											
+NET-016	Support	Network support and spares	Support term											
+Networking Total					₹ / $	₹ / $	₹ / $							
+														
+D. Platform Tools and Licences														
+														
+BOM ID	Platform Tool	Product / Edition	Licence Metric	Quantity	Initial Cost	Annual Cost	TCO							
+PLT-001	Operating system		Server/core											
+PLT-002	Kubernetes platform		Node/core/cluster											
+PLT-003	GPU software stack		GPU/server											
+PLT-004	Model-serving platform		GPU/node											
+PLT-005	AI gateway/model router		Node/request											
+PLT-006	RAG orchestration		Node/instance											
+PLT-007	Vector database		Node/TB											
+PLT-008	Metadata database		Node/core											
+PLT-009	MLOps platform		User/node											
+PLT-010	Model registry		User/storage											
+PLT-011	Monitoring platform		Node/data volume											
+PLT-012	Logging/SIEM		GB ingested											
+PLT-013	IAM and secrets		User/instance											
+PLT-014	AI guardrails		Request/node											
+PLT-015	Backup software		TB/workload											
+PLT-016	DR orchestration		Site/workload											
+PLT-017	CI/CD and automation		User/runner											
+Platform Total					₹ / $	₹ / $	₹ / $							
+														
+3. Cloud Executive-Level BOM														
+														
+Cloud Cost Layer	Recommended Service Capacity	One-Time Cost	Monthly Cost	Annual Cost	3/5-Year TCO	% of TCO								
+GPU Compute	GPU instance type, quantity and usage hours													
+CPU Compute	Application, management and processing instances													
+Managed AI Models	Hosted model tokens, requests or provisioned throughput													
+Storage	Object, file, block, archive and backup													
+Networking	Load balancers, NAT, private links, egress and connectivity													
+Platform Tools	Containers, databases, AI tools, security and monitoring													
+Implementation Labour	Landing zone, deployment and integration													
+Operations and Support	Cloud operations, support plan and managed services													
+DR and Resilience	Multi-zone and multi-region services													
+Contingency	Usage and price variance reserve													
+Total Cloud BOM		₹ / $	₹ / $	₹ / $	₹ / $	100%								
+														
+Cloud Capacity Summary														
+														
+KPI	Final Output													
+Cloud Provider														
+Primary Region														
+DR Region														
+GPU Instance Type														
+Maximum GPU Instances														
+Monthly GPU Hours														
+Monthly CPU Hours														
+Managed Model Tokens														
+Object Storage Capacity														
+Database Capacity														
+Monthly Data Egress														
+Availability Target														
+Commitment Model	On-Demand / Reserved / Savings Plan													
+Monthly Run Rate														
+Annual Run Rate														
+														
+														
+4. Cloud Component-Level BOM														
+														
+Standard Columns														
+														
+BOM ID	Service Category	Cloud Service	Region	Pricing Unit	Quantity / Usage	Unit Price	Monthly Cost	Annual Cost	TCO					
+														
+A. Cloud Compute and AI Services														
+														
+BOM ID	Component	Required Configuration	Usage Metric	Monthly Usage	Monthly Cost	Annual Cost	TCO							
+CLD-001	GPU instances	Instance type and GPUs/instance	Instance-hours											
+CLD-002	CPU instances	vCPU and RAM	Instance-hours											
+CLD-003	Kubernetes worker nodes	Node type	Node-hours											
+CLD-004	Kubernetes control plane	Cluster	Cluster-months											
+CLD-005	Serverless compute	Memory and execution time	Invocation/GB-sec											
+CLD-006	Managed model inference	Model and deployment type	Tokens/requests											
+CLD-007	Provisioned model throughput	Capacity unit	Unit-hours											
+CLD-008	Embedding service	Embedding model	Tokens/requests											
+CLD-009	Reranking service	Reranker model	Requests											
+CLD-010	OCR/document AI	Pages/documents	Pages											
+CLD-011	Speech AI	Audio duration	Audio hours											
+CLD-012	Image generation	Image size and quality	Images											
+CLD-013	Batch processing	Compute profile	Job-hours											
+CLD-014	Development environment	Instance profile	User-hours											
+Cloud Compute Total					₹ / $	₹ / $	₹ / $							
+														
+B. Cloud Storage and Database														
+														
+BOM ID	Component	Service Tier	Capacity / Usage Metric	Monthly Usage	Monthly Cost	Annual Cost	TCO							
+CST-001	Object storage	Hot/standard	GB-month											
+CST-002	Cool storage	Cool/infrequent access	GB-month											
+CST-003	Archive storage	Archive tier	GB-month											
+CST-004	Block storage	SSD/performance tier	GB and IOPS											
+CST-005	File storage	Performance tier	GB and throughput											
+CST-006	Managed vector database	Capacity tier	Nodes/GB/queries											
+CST-007	Relational database	Instance and storage	Instance-hours											
+CST-008	NoSQL database	Capacity mode	Requests/capacity units											
+CST-009	Cache service	Instance size	Instance-hours											
+CST-010	Backup storage	Retention tier	GB-month											
+CST-011	Snapshot storage	Snapshot volume	GB-month											
+CST-012	Cross-region replication	Replicated data	GB-month											
+Cloud Storage Total					₹ / $	₹ / $	₹ / $							
+														
+5. Hybrid Executive-Level BOM														
+														
+Infrastructure Layer	On-Premises Cost	Cloud Cost	One-Time Cost	Annual Cost	3/5-Year TCO	% of TCO								
+GPU Compute														
+CPU Compute														
+On-Premises Storage														
+Cloud Storage and Databases														
+Ethernet Networking														
+InfiniBand / GPU Fabric														
+Cloud and WAN Connectivity														
+AI Platform Tools and Licences														
+Managed AI Model Consumption	N/A													
+Integration and Implementation Labour														
+Operations and Support														
+Facility and Power		N/A												
+DR and Resilience														
+Contingency														
+Total Hybrid BOM	₹ / $	₹ / $	₹ / $	₹ / $	₹ / $	100%								
+														
+Hybrid Capacity Summary														
+														
+KPI	On-Premises	Cloud	Combined											
+GPU Capacity														
+CPU Capacity														
+Storage Capacity														
+AI Models Hosted														
+Peak Concurrent Requests														
+Production Capacity														
+DR Capacity														
+Growth/Burst Capacity														
+Annual Run Rate														
+														
+														
+6. Hybrid Component-Level BOM														
+														
+Standard Columns														
+														
+BOM ID	Layer	Deployment Location	Component / Service	Make, SKU or Service Tier	Pricing Metric	Quantity / Usage	One-Time Cost	Annual Cost	TCO					
+														
+A. On-Premises Components														
+														
+BOM ID	Component	Final Configuration	Quantity	Initial Cost	Annual Cost	TCO								
+HYB-ONP-001	GPU servers	GPU model and GPUs/server												
+HYB-ONP-002	CPU servers	CPU, RAM and storage												
+HYB-ONP-003	High-performance storage	Raw and usable capacity												
+HYB-ONP-004	Object/vector storage	Raw and usable capacity												
+HYB-ONP-005	Ethernet switches	Speed and port count												
+HYB-ONP-006	InfiniBand fabric	Switches, adapters and cables												
+HYB-ONP-007	Platform licences	GPU, node, core or TB metric												
+HYB-ONP-008	Racks, power and cooling	Capacity and quantity												
+HYB-ONP-009	Hardware support	Support level and term												
+On-Premises Subtotal				₹ / $	₹ / $	₹ / $								
+														
+B. Cloud Components														
+														
+BOM ID	Component	Cloud Service / Tier	Usage Metric	Monthly Usage	Annual Cost	TCO								
+HYB-CLD-001	Cloud GPU compute	Instance type	Instance-hours											
+HYB-CLD-002	Cloud CPU compute	Instance type	Instance-hours											
+HYB-CLD-003	Managed AI models	Model/deployment	Tokens/requests											
+HYB-CLD-004	Cloud object storage	Storage tier	GB-month											
+HYB-CLD-005	Cloud database/vector DB	Service tier	Nodes/queries											
+HYB-CLD-006	Backup/DR storage	Storage tier	GB-month											
+HYB-CLD-007	Monitoring and security	Service tier	Data/instances											
+HYB-CLD-008	Cloud support plan	Support tier	Percentage/tier											
+Cloud Subtotal					₹ / $	₹ / $								
+														
+C. Hybrid Connectivity and Integration														
+														
+BOM ID	Component	Required Specification	Quantity / Usage	Initial Cost	Annual Cost	TCO								
+HYB-NET-001	Dedicated cloud circuit	Bandwidth and redundancy												
+HYB-NET-002	Secondary connectivity	Backup bandwidth												
+HYB-NET-003	Cloud exchange/cross-connect	Ports and location												
+HYB-NET-004	WAN routers	Throughput and HA												
+HYB-NET-005	Firewalls	Throughput and HA												
+HYB-NET-006	Data transfer/egress	Monthly transfer												
+HYB-NET-007	DNS/traffic management	Queries and endpoints												
+HYB-INT-001	AI model gateway	On-premises/cloud routing												
+HYB-INT-002	Identity federation	Users and applications												
+HYB-INT-003	Secrets/key integration	Instances and operations												
+HYB-INT-004	Data replication	Data volume and frequency												
+HYB-INT-005	Central monitoring	Metrics, logs and traces												
+HYB-INT-006	FinOps/showback	Resources and clusters												
+Connectivity and Integration Subtotal				₹ / $	₹ / $	₹ / $								
+														
+														
+Deployment Option	Initial CAPEX	Year 1 OPEX	Annual Steady-State OPEX	3-Year TCO	5-Year TCO									
+On-Premises														
+Cloud														
+Hybrid														
+														
+Final Comparison														
+														
+Evaluation Area	On-Premises	Cloud	Hybrid											
+Initial Investment														
+Annual Operating Cost														
+Scalability														
+Data Control														
+Deployment Speed														
+GPU Availability														
+Operational Complexity														
+Facility Dependency														
+DR Flexibility														
+3/5-Year TCO														
+
+
+
+==============================================================================================================================================================================================================
+
+

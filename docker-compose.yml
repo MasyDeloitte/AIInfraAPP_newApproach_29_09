@@ -1,0 +1,45 @@
+version: "3.9"
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: ai_sizing
+      POSTGRES_USER: ai_sizing
+      POSTGRES_PASSWORD: ai_sizing_dev_password
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ai_sizing -d ai_sizing"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+  backend:
+    build: ./backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql+psycopg://ai_sizing:ai_sizing_dev_password@db:5432/ai_sizing
+      JWT_SECRET: change-this-local-secret
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: Admin@12345
+      USER_USERNAME: user
+      USER_PASSWORD: User@12345
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  frontend:
+    build: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+    ports:
+      - "3000:3000"
+volumes:
+  postgres_data:

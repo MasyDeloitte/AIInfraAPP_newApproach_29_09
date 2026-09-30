@@ -1,0 +1,50 @@
+                    ┌─────────────────────┐
+                    │     Next.js UI      │
+                    │  React + TypeScript  │
+                    └──────────┬──────────┘
+                               │
+                         REST / OpenAPI
+                               │
+                    ┌──────────▼──────────┐
+                    │     FastAPI API     │
+                    ├─────────────────────┤
+                    │ Authentication/RBAC │
+                    │ Project Management  │
+                    │ Catalog Management  │
+                    │ Evidence Management │
+                    │ Sizing API           │
+                    │ Report API           │
+                    └──────────┬──────────┘
+                               │
+              ┌────────────────▼────────────────┐
+              │       AI SIZING ENGINE          │
+              │                                 │
+              │ Validation                      │
+              │ Workload                        │
+              │ Model Selection                 │
+              │ Capacity                        │
+              │ Infrastructure                  │
+              │ HA / DR / Growth                │
+              │ BOM                             │
+              │ Cost / TCO                      │
+              │ Comparison                      │
+              │ Lineage / Confidence            │
+              └────────────────┬────────────────┘
+                               │
+              ┌────────────────▼────────────────┐
+              │          PostgreSQL             │
+              ├─────────────────────────────────┤
+              │ Projects                        │
+              │ Calculations                    │
+              │ Catalogs                        │
+              │ Models                          │
+              │ Servers                         │
+              │ GPUs                            │
+              │ Cloud Services                  │
+              │ Benchmarks                      │
+              │ Pricing                         │
+              │ Assumptions                     │
+              │ Evidence                        │
+              │ Versions                        │
+              │ Users / Roles                   │
+              └─────────────────────────────────┘

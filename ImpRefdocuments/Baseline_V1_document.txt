@@ -1,0 +1,3540 @@
+# AI Infrastructure Sizing Engine
+
+## V1 Technical Specification
+
+**Status:** Engineering Baseline
+**Version:** 1.0
+**Target:** Local Windows 11 development → production deployment
+**Architecture:** Modular Monolith
+**Primary Deployment Modes:** On-Premises, Cloud, Hybrid
+
+---
+
+# 1. Purpose
+
+The AI Infrastructure Sizing Engine is a deterministic, catalog-driven application that converts business, workload, AI-model and infrastructure requirements into:
+
+* AI workload estimates
+* model recommendations
+* GPU/CPU/RAM/storage/network requirements
+* physical infrastructure topology
+* HA/DR capacity
+* growth capacity
+* infrastructure BOM
+* pricing
+* CAPEX/OPEX
+* 3-year and 5-year TCO
+* On-Prem / Cloud / Hybrid comparisons
+* calculation lineage
+* evidence and confidence
+* PDF, Excel and JSON reports
+
+The system is designed for **engineering decision support and infrastructure planning**, not merely dashboard visualization.
+
+---
+
+# 2. V1 Scope
+
+## 2.1 Deployment scenarios
+
+V1 supports exactly three deployment strategies:
+
+```text
+ON-PREM
+CLOUD
+HYBRID
+```
+
+All three use the same logical workload and capacity calculation engine.
+
+Only the infrastructure materialization differs.
+
+```text
+                    ┌────────────────────┐
+                    │   Workload Input    │
+                    └─────────┬──────────┘
+                              │
+                    ┌─────────▼──────────┐
+                    │ Workload Engine    │
+                    └─────────┬──────────┘
+                              │
+                    ┌─────────▼──────────┐
+                    │ Model Engine       │
+                    └─────────┬──────────┘
+                              │
+                    ┌─────────▼──────────┐
+                    │ Capacity Engine    │
+                    └─────────┬──────────┘
+                              │
+                    ┌─────────▼──────────┐
+                    │ Placement Engine   │
+                    └─────┬───────┬──────┘
+                          /         \
+                    ON-PREM       CLOUD
+                          \         /
+                           \       /
+                            HYBRID
+```
+
+---
+
+# 3. V1 Catalog Minimums
+
+The database and APIs must NOT impose these as maximum limits.
+
+Minimum seed catalog:
+
+| Catalog                    |         Minimum |
+| -------------------------- | --------------: |
+| Use cases                  |              15 |
+| Free/self-hostable models  |              10 |
+| Paid/hosted models         |              10 |
+| Dell server configurations |              10 |
+| HPE server configurations  |              10 |
+| Cloud configurations       |              20 |
+| Cloud providers            | AWS, Azure, GCP |
+
+The server catalog must cover:
+
+* NVIDIA L40S
+* NVIDIA H100
+* NVIDIA H200
+* NVIDIA B200
+* NVIDIA B300
+* NVIDIA GB300 systems
+
+for both Dell and HPE catalog coverage.
+
+---
+
+# 4. Technology Stack
+
+## Frontend
+
+```text
+Next.js
+React
+TypeScript
+Tailwind CSS
+shadcn/ui
+Apache ECharts / Recharts
+React Hook Form
+Zod
+```
+
+## Backend
+
+```text
+Python
+FastAPI
+Pydantic
+SQLAlchemy
+Alembic
+Pytest
+```
+
+## Database
+
+```text
+PostgreSQL
+```
+
+## Local development
+
+```text
+Windows 11
+Docker Desktop
+Docker Compose
+Git
+VS Code
+```
+
+## Reporting
+
+```text
+PDF
+Excel
+JSON
+```
+
+## Testing
+
+```text
+Pytest
+Playwright
+API integration tests
+Calculation fixtures
+Golden/reference calculations
+```
+
+## Future production capabilities
+
+```text
+OIDC/OAuth2
+Redis
+Background workers
+S3-compatible object storage
+OpenTelemetry
+Prometheus
+Grafana
+Kubernetes
+```
+
+These are not required for the first local implementation.
+
+---
+
+# 5. Architectural Principles
+
+## 5.1 Deterministic calculation
+
+For identical:
+
+* input version
+* model catalog version
+* hardware catalog version
+* benchmark version
+* assumption version
+* pricing version
+* calculation-engine version
+
+the engine must produce the same result.
+
+---
+
+## 5.2 Catalog-driven
+
+Technical values must not be hard-coded into calculation logic when they belong in a catalog.
+
+Examples:
+
+```text
+GPU memory
+GPU TDP
+server GPU count
+server CPU count
+server RAM
+server networking
+cloud hourly price
+model parameter count
+model context window
+benchmark throughput
+utilization target
+growth rate
+complexity multiplier
+```
+
+These belong in governed data.
+
+---
+
+# 6. High-Level Architecture
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│                         WEB APPLICATION                       │
+│                                                              │
+│ Next.js / React / TypeScript                                 │
+│                                                              │
+│ Dashboard | Project Wizard | Results | Reports | Admin       │
+└─────────────────────────────┬────────────────────────────────┘
+                              │
+                         REST / JSON
+                              │
+┌─────────────────────────────▼────────────────────────────────┐
+│                         FASTAPI API                           │
+│                                                              │
+│ Auth / RBAC                                                  │
+│ Projects                                                     │
+│ Sizing                                                       │
+│ Catalogs                                                     │
+│ Evidence                                                     │
+│ Reports                                                      │
+└─────────────────────────────┬────────────────────────────────┘
+                              │
+┌─────────────────────────────▼────────────────────────────────┐
+│                    APPLICATION SERVICES                      │
+│                                                              │
+│ Project Service                                              │
+│ Sizing Service                                               │
+│ Catalog Service                                              │
+│ Report Service                                               │
+│ Evidence Service                                             │
+└─────────────────────────────┬────────────────────────────────┘
+                              │
+┌─────────────────────────────▼────────────────────────────────┐
+│                     DOMAIN / ENGINE                          │
+│                                                              │
+│ Validation                                                   │
+│ Workload                                                     │
+│ Model                                                        │
+│ Capacity                                                     │
+│ Topology                                                     │
+│ HA/DR                                                        │
+│ Growth                                                       │
+│ BOM                                                          │
+│ Cost                                                         │
+│ TCO                                                          │
+│ Comparison                                                   │
+│ Lineage                                                      │
+└─────────────────────────────┬────────────────────────────────┘
+                              │
+┌─────────────────────────────▼────────────────────────────────┐
+│                       CATALOG LAYER                           │
+│                                                              │
+│ Models | GPUs | Servers | Cloud | Benchmarks | Pricing       │
+│ Assumptions | Use Cases | Platforms | Evidence               │
+└─────────────────────────────┬────────────────────────────────┘
+                              │
+┌─────────────────────────────▼────────────────────────────────┐
+│                         POSTGRESQL                            │
+└──────────────────────────────────────────────────────────────┘
+```
+
+---
+
+# 7. Repository Structure
+
+The project will use a monorepo.
+
+```text
+ai-sizing-engine/
+│
+├── README.md
+├── LICENSE
+├── .gitignore
+├── .env.example
+├── docker-compose.yml
+├── docker-compose.dev.yml
+├── Makefile
+│
+├── docs/
+│   ├── architecture/
+│   │   ├── system-architecture.md
+│   │   ├── domain-model.md
+│   │   ├── calculation-architecture.md
+│   │   └── security-architecture.md
+│   │
+│   ├── calculations/
+│   │   ├── workload.md
+│   │   ├── model-selection.md
+│   │   ├── capacity.md
+│   │   ├── topology.md
+│   │   ├── ha-dr.md
+│   │   ├── bom.md
+│   │   ├── cost.md
+│   │   └── tco.md
+│   │
+│   ├── api/
+│   │   └── api-contract.md
+│   │
+│   └── decisions/
+│       ├── ADR-001-modular-monolith.md
+│       ├── ADR-002-postgresql.md
+│       └── ADR-003-local-authentication.md
+│
+├── backend/
+│   ├── pyproject.toml
+│   ├── Dockerfile
+│   │
+│   ├── app/
+│   │   ├── main.py
+│   │   │
+│   │   ├── api/
+│   │   │   ├── deps.py
+│   │   │   ├── router.py
+│   │   │   │
+│   │   │   └── v1/
+│   │   │       ├── auth.py
+│   │   │       ├── users.py
+│   │   │       ├── projects.py
+│   │   │       ├── sizing.py
+│   │   │       ├── catalogs.py
+│   │   │       ├── evidence.py
+│   │   │       └── reports.py
+│   │   │
+│   │   ├── core/
+│   │   │   ├── config.py
+│   │   │   ├── security.py
+│   │   │   ├── logging.py
+│   │   │   └── exceptions.py
+│   │   │
+│   │   ├── db/
+│   │   │   ├── session.py
+│   │   │   ├── base.py
+│   │   │   └── migrations/
+│   │   │
+│   │   ├── models/
+│   │   │   ├── user.py
+│   │   │   ├── project.py
+│   │   │   ├── calculation.py
+│   │   │   ├── catalog.py
+│   │   │   ├── evidence.py
+│   │   │   └── report.py
+│   │   │
+│   │   ├── schemas/
+│   │   │   ├── auth.py
+│   │   │   ├── project.py
+│   │   │   ├── sizing.py
+│   │   │   ├── catalog.py
+│   │   │   └── report.py
+│   │   │
+│   │   ├── services/
+│   │   │   ├── auth_service.py
+│   │   │   ├── project_service.py
+│   │   │   ├── sizing_service.py
+│   │   │   ├── catalog_service.py
+│   │   │   ├── evidence_service.py
+│   │   │   └── report_service.py
+│   │   │
+│   │   └── engine/
+│   │       ├── pipeline.py
+│   │       │
+│   │       ├── validation/
+│   │       ├── workload/
+│   │       ├── model/
+│   │       ├── capacity/
+│   │       ├── topology/
+│   │       ├── availability/
+│   │       ├── growth/
+│   │       ├── bom/
+│   │       ├── cost/
+│   │       ├── tco/
+│   │       ├── comparison/
+│   │       ├── lineage/
+│   │       └── confidence/
+│   │
+│   └── tests/
+│       ├── unit/
+│       ├── integration/
+│       ├── calculation/
+│       └── fixtures/
+│
+├── frontend/
+│   ├── package.json
+│   ├── Dockerfile
+│   │
+│   ├── app/
+│   │   ├── login/
+│   │   ├── dashboard/
+│   │   ├── projects/
+│   │   ├── sizing/
+│   │   ├── results/
+│   │   ├── reports/
+│   │   └── admin/
+│   │       ├── models/
+│   │       ├── servers/
+│   │       ├── cloud/
+│   │       ├── benchmarks/
+│   │       ├── pricing/
+│   │       ├── assumptions/
+│   │       ├── use-cases/
+│   │       └── evidence/
+│   │
+│   ├── components/
+│   │   ├── forms/
+│   │   ├── tables/
+│   │   ├── charts/
+│   │   ├── sizing/
+│   │   └── admin/
+│   │
+│   ├── lib/
+│   │   ├── api.ts
+│   │   ├── auth.ts
+│   │   └── validation.ts
+│   │
+│   └── tests/
+│       └── e2e/
+│
+├── catalogs/
+│   ├── use-cases/
+│   ├── models/
+│   ├── gpus/
+│   ├── servers/
+│   ├── cloud/
+│   ├── benchmarks/
+│   ├── pricing/
+│   ├── assumptions/
+│   └── evidence/
+│
+├── scripts/
+│   ├── seed_database.py
+│   ├── validate_catalogs.py
+│   ├── import_catalog.py
+│   └── export_catalog.py
+│
+└── deployment/
+    ├── docker/
+    └── production/
+```
+
+---
+
+# 8. Domain Modules
+
+The backend will have explicit domain boundaries.
+
+```text
+validation
+workload
+model
+capacity
+topology
+availability
+growth
+bom
+cost
+tco
+comparison
+lineage
+confidence
+```
+
+No domain module should directly depend on the frontend.
+
+The engine must be usable from:
+
+```text
+API
+CLI
+automated tests
+future batch jobs
+```
+
+---
+
+# 9. Database Model
+
+The PostgreSQL database is divided conceptually into:
+
+```text
+Identity
+Projects
+Catalogs
+Evidence
+Calculations
+Reports
+Audit
+```
+
+---
+
+# 10. Identity Tables
+
+## users
+
+```text
+users
+-----
+id UUID PK
+username VARCHAR UNIQUE
+email VARCHAR UNIQUE
+password_hash TEXT
+display_name VARCHAR
+is_active BOOLEAN
+created_at TIMESTAMP
+updated_at TIMESTAMP
+last_login_at TIMESTAMP
+```
+
+## roles
+
+```text
+roles
+-----
+id UUID PK
+name VARCHAR UNIQUE
+description TEXT
+```
+
+Seed roles:
+
+```text
+ADMIN
+USER
+```
+
+## user_roles
+
+```text
+user_roles
+----------
+user_id UUID FK
+role_id UUID FK
+
+PRIMARY KEY(user_id, role_id)
+```
+
+---
+
+# 11. Project Tables
+
+## projects
+
+```text
+projects
+--------
+id UUID PK
+project_code VARCHAR UNIQUE
+name VARCHAR
+description TEXT
+industry VARCHAR
+location_country VARCHAR
+planning_period_years INTEGER
+currency VARCHAR
+pricing_basis VARCHAR
+owner_user_id UUID FK
+status VARCHAR
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Status:
+
+```text
+DRAFT
+CALCULATED
+REVIEW
+FINAL
+ARCHIVED
+```
+
+---
+
+# 12. Input Versioning
+
+Never overwrite a calculation input used by a completed calculation.
+
+## project_input_versions
+
+```text
+project_input_versions
+----------------------
+id UUID PK
+project_id UUID FK
+version INTEGER
+input_json JSONB
+schema_version VARCHAR
+created_by UUID FK
+created_at TIMESTAMP
+is_active BOOLEAN
+```
+
+Example:
+
+```text
+Project P-001
+Input Version 1
+Input Version 2
+Input Version 3
+```
+
+Each calculation references exactly one input version.
+
+---
+
+# 13. Use Case Catalog
+
+## use_cases
+
+```text
+use_cases
+---------
+id UUID PK
+code VARCHAR UNIQUE
+name VARCHAR
+description TEXT
+classification VARCHAR
+default_applicable_users_pct NUMERIC
+active BOOLEAN
+catalog_version VARCHAR
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Classification:
+
+```text
+INTERACTIVE
+BATCH
+TRAINING
+FINE_TUNING
+MEDIA_GENERATION
+DATA_PROCESSING
+```
+
+---
+
+# 14. Use Case Assumptions
+
+## use_case_assumptions
+
+```text
+use_case_assumptions
+--------------------
+id UUID PK
+use_case_id UUID FK
+complexity VARCHAR
+usage_intensity_factor NUMERIC
+transactions_per_user_default NUMERIC
+agentic_step_multiplier NUMERIC NULL
+token_multiplier NUMERIC NULL
+latency_target_ms INTEGER NULL
+active BOOLEAN
+effective_from DATE
+effective_to DATE NULL
+assumption_version VARCHAR
+```
+
+Complexity:
+
+```text
+SIMPLE
+MEDIUM
+STRONG
+```
+
+Default conceptual complexity multipliers:
+
+```text
+SIMPLE  = 1.0
+MEDIUM  = 1.5
+STRONG  = 2.5
+```
+
+These values are catalog assumptions, not hard-coded engine constants.
+
+---
+
+# 15. Model Catalog
+
+## models
+
+```text
+models
+------
+id UUID PK
+model_code VARCHAR UNIQUE
+name VARCHAR
+provider VARCHAR
+family VARCHAR
+model_type VARCHAR
+deployment_type VARCHAR
+parameter_count BIGINT
+context_window INTEGER
+modality JSONB
+license_type VARCHAR
+license_text TEXT
+self_hostable BOOLEAN
+api_available BOOLEAN
+active BOOLEAN
+catalog_version VARCHAR
+created_at TIMESTAMP
+updated_at TIMESTAMP
+```
+
+Deployment type:
+
+```text
+SELF_HOSTED
+HOSTED_API
+BOTH
+```
+
+---
+
+# 16. Model Hardware Requirements
+
+## model_hardware_profiles
+
+```text
+model_hardware_profiles
+-----------------------
+id UUID PK
+model_id UUID FK
+precision VARCHAR
+quantization VARCHAR NULL
+weight_memory_gb NUMERIC
+kv_cache_gb NUMERIC NULL
+minimum_gpu_memory_gb NUMERIC
+minimum_gpu_count INTEGER
+tensor_parallelism INTEGER
+pipeline_parallelism INTEGER
+runtime_overhead_pct NUMERIC
+safety_margin_pct NUMERIC
+profile_version VARCHAR
+```
+
+---
+
+# 17. Model Placement Rules
+
+## model_placement_rules
+
+```text
+model_placement_rules
+---------------------
+id UUID PK
+model_id UUID FK
+data_residency_allowed BOOLEAN
+external_api_allowed BOOLEAN
+minimum_privacy_level VARCHAR
+deployment_preference VARCHAR
+priority INTEGER
+active BOOLEAN
+```
+
+---
+
+# 18. GPU Catalog
+
+## gpus
+
+```text
+gpus
+----
+id UUID PK
+gpu_code VARCHAR UNIQUE
+vendor VARCHAR
+model VARCHAR
+architecture VARCHAR
+memory_gb NUMERIC
+memory_bandwidth_gbps NUMERIC
+fp16_tflops NUMERIC NULL
+bf16_tflops NUMERIC NULL
+fp8_tflops NUMERIC NULL
+fp4_tops NUMERIC NULL
+tdp_watts NUMERIC
+nvlink BOOLEAN
+nvlink_bandwidth_gbps NUMERIC NULL
+pcie_generation VARCHAR
+active BOOLEAN
+catalog_version VARCHAR
+```
+
+---
+
+# 19. Server Catalog
+
+## server_configurations
+
+```text
+server_configurations
+---------------------
+id UUID PK
+server_code VARCHAR UNIQUE
+vendor VARCHAR
+model VARCHAR
+generation VARCHAR
+form_factor VARCHAR
+gpu_type VARCHAR
+gpu_count INTEGER
+cpu_model VARCHAR
+cpu_socket_count INTEGER
+cpu_core_count INTEGER
+system_ram_gb INTEGER
+local_nvme_tb NUMERIC
+network_interfaces JSONB
+gpu_interconnect JSONB
+power_watts NUMERIC
+rack_units NUMERIC
+supported_gpu_topology JSONB
+active BOOLEAN
+catalog_version VARCHAR
+```
+
+Vendor values:
+
+```text
+DELL
+HPE
+```
+
+---
+
+# 20. Cloud Catalog
+
+## cloud_configurations
+
+```text
+cloud_configurations
+--------------------
+id UUID PK
+provider VARCHAR
+region VARCHAR
+service_name VARCHAR
+instance_type VARCHAR
+gpu_type VARCHAR NULL
+gpu_count INTEGER
+gpu_memory_gb NUMERIC
+vcpu INTEGER
+ram_gb NUMERIC
+local_nvme_gb NUMERIC NULL
+network_gbps NUMERIC NULL
+gpu_interconnect JSONB NULL
+availability VARCHAR
+active BOOLEAN
+catalog_version VARCHAR
+```
+
+Providers:
+
+```text
+AWS
+AZURE
+GCP
+```
+
+---
+
+# 21. Cloud Pricing
+
+## cloud_pricing
+
+```text
+cloud_pricing
+-------------
+id UUID PK
+cloud_configuration_id UUID FK
+region VARCHAR
+billing_unit VARCHAR
+currency VARCHAR
+on_demand_price NUMERIC
+reserved_price NUMERIC NULL
+committed_price NUMERIC NULL
+spot_price NUMERIC NULL
+minimum_commitment VARCHAR NULL
+billing_granularity VARCHAR
+effective_from DATE
+effective_to DATE NULL
+pricing_version VARCHAR
+```
+
+---
+
+# 22. Benchmark Catalog
+
+## benchmarks
+
+```text
+benchmarks
+----------
+id UUID PK
+benchmark_code VARCHAR UNIQUE
+model_id UUID FK
+gpu_id UUID FK
+server_configuration_id UUID NULL
+cloud_configuration_id UUID NULL
+precision VARCHAR
+backend VARCHAR
+context_tokens INTEGER
+concurrency INTEGER
+input_tokens INTEGER
+output_tokens INTEGER
+ttft_p50_ms NUMERIC NULL
+ttft_p95_ms NUMERIC NULL
+ttft_p99_ms NUMERIC NULL
+itp_ms NUMERIC NULL
+output_tokens_per_second NUMERIC NULL
+requests_per_second NUMERIC NULL
+gpu_utilization_pct NUMERIC NULL
+vram_gb NUMERIC NULL
+confidence VARCHAR
+evidence_id UUID FK
+benchmark_version VARCHAR
+```
+
+A benchmark is **not universal**.
+
+It applies to its specific:
+
+```text
+model
+GPU
+precision
+backend
+context
+concurrency
+input/output token profile
+```
+
+---
+
+# 23. Assumption Catalog
+
+## assumptions
+
+```text
+assumptions
+-----------
+id UUID PK
+code VARCHAR UNIQUE
+name VARCHAR
+category VARCHAR
+value_numeric NUMERIC NULL
+value_text TEXT NULL
+unit VARCHAR
+description TEXT
+source_type VARCHAR
+confidence VARCHAR
+effective_from DATE
+effective_to DATE NULL
+version VARCHAR
+active BOOLEAN
+```
+
+Examples:
+
+```text
+ASSUMPTION_COMPLEXITY_MEDIUM
+ASSUMPTION_COMPLEXITY_STRONG
+ASSUMPTION_DEFAULT_GROWTH
+ASSUMPTION_TARGET_GPU_UTILIZATION
+ASSUMPTION_STORAGE_HEADROOM
+ASSUMPTION_NETWORK_HEADROOM
+ASSUMPTION_CPU_UTILIZATION
+```
+
+---
+
+# 24. Evidence Repository
+
+## evidence
+
+```text
+evidence
+--------
+id UUID PK
+evidence_code VARCHAR UNIQUE
+source_organization VARCHAR
+source_type VARCHAR
+document_title TEXT
+source_url TEXT
+publication_date DATE NULL
+retrieved_date DATE
+document_version VARCHAR NULL
+relevant_section TEXT NULL
+evidence_value TEXT
+applicable_component_type VARCHAR
+applicable_component_id UUID NULL
+valid_from DATE NULL
+valid_to DATE NULL
+confidence VARCHAR
+notes TEXT NULL
+```
+
+Source type:
+
+```text
+PRIMARY
+BENCHMARK
+ACADEMIC
+SECONDARY
+ENGINEERING_ASSUMPTION
+```
+
+Confidence:
+
+```text
+HIGH
+MEDIUM
+LOW
+UNVERIFIED
+```
+
+---
+
+# 25. Calculation Run
+
+## calculation_runs
+
+```text
+calculation_runs
+----------------
+id UUID PK
+project_id UUID FK
+input_version_id UUID FK
+
+calculation_engine_version VARCHAR
+model_catalog_version VARCHAR
+gpu_catalog_version VARCHAR
+server_catalog_version VARCHAR
+cloud_catalog_version VARCHAR
+benchmark_version VARCHAR
+assumption_version VARCHAR
+pricing_version VARCHAR
+
+status VARCHAR
+
+started_at TIMESTAMP
+completed_at TIMESTAMP
+
+input_hash VARCHAR
+calculation_hash VARCHAR
+
+overall_confidence VARCHAR
+
+warnings JSONB
+errors JSONB
+```
+
+This is one of the most important tables.
+
+It guarantees that we can answer:
+
+> "Exactly how did this result get calculated?"
+
+---
+
+# 26. Calculation Lineage
+
+## calculation_lineage
+
+```text
+calculation_lineage
+-------------------
+id UUID PK
+calculation_run_id UUID FK
+metric_code VARCHAR
+value_numeric NUMERIC NULL
+value_text TEXT NULL
+unit VARCHAR
+value_type VARCHAR
+formula_code VARCHAR NULL
+input_references JSONB
+catalog_references JSONB
+evidence_references JSONB
+confidence VARCHAR
+created_at TIMESTAMP
+```
+
+Example:
+
+```json
+{
+  "metric_code": "production_gpu_count",
+  "value_numeric": 48,
+  "unit": "GPU",
+  "value_type": "DERIVED",
+  "formula_code": "GPU_REQUIREMENT_V1",
+  "input_references": [
+    "WL-001"
+  ],
+  "catalog_references": [
+    "MOD-023",
+    "GPU-014"
+  ],
+  "evidence_references": [
+    "BENCH-092"
+  ],
+  "confidence": "MEDIUM"
+}
+```
+
+---
+
+# 27. Result Tables
+
+The engine can store normalized result data and the complete calculation package as JSONB.
+
+## sizing_results
+
+```text
+sizing_results
+--------------
+id UUID PK
+calculation_run_id UUID FK
+deployment_mode VARCHAR
+result_json JSONB
+created_at TIMESTAMP
+```
+
+Deployment:
+
+```text
+ON_PREM
+CLOUD
+HYBRID
+```
+
+---
+
+# 28. BOM
+
+## bom_items
+
+```text
+bom_items
+---------
+id UUID PK
+calculation_run_id UUID FK
+deployment_mode VARCHAR
+
+bom_code VARCHAR
+category VARCHAR
+component VARCHAR
+manufacturer VARCHAR NULL
+model VARCHAR NULL
+specification TEXT
+unit VARCHAR
+
+production_qty NUMERIC
+ha_qty NUMERIC
+dr_qty NUMERIC
+growth_qty NUMERIC
+spare_qty NUMERIC
+total_qty NUMERIC
+
+unit_price NUMERIC NULL
+initial_cost NUMERIC NULL
+annual_cost NUMERIC NULL
+tco_cost NUMERIC NULL
+
+currency VARCHAR
+```
+
+---
+
+# 29. Reports
+
+## reports
+
+```text
+reports
+-------
+id UUID PK
+calculation_run_id UUID FK
+report_type VARCHAR
+format VARCHAR
+file_reference TEXT
+created_at TIMESTAMP
+created_by UUID FK
+```
+
+Report types:
+
+```text
+EXECUTIVE
+TECHNICAL
+BOM
+COST
+FULL
+```
+
+Formats:
+
+```text
+PDF
+XLSX
+JSON
+```
+
+---
+
+# 30. Audit Log
+
+## audit_logs
+
+```text
+audit_logs
+----------
+id UUID PK
+user_id UUID FK
+action VARCHAR
+entity_type VARCHAR
+entity_id UUID
+before_json JSONB NULL
+after_json JSONB NULL
+timestamp TIMESTAMP
+ip_address INET NULL
+```
+
+Admin catalog modifications must be auditable.
+
+---
+
+# 31. Authentication and Authorization
+
+V1 uses local authentication.
+
+## USER
+
+Can:
+
+```text
+login
+create project
+edit own project
+run sizing
+view results
+generate reports
+export reports
+```
+
+Cannot:
+
+```text
+edit catalogs
+edit benchmarks
+edit pricing
+edit assumptions
+edit evidence
+manage users
+```
+
+## ADMIN
+
+Can perform everything a USER can, plus:
+
+```text
+create/update/archive catalogs
+create/update evidence
+manage benchmarks
+manage pricing
+manage assumptions
+manage models
+manage hardware
+manage cloud configurations
+manage users
+view audit logs
+```
+
+Authorization must be enforced server-side.
+
+The frontend must never be considered a security boundary.
+
+---
+
+# 32. Project Input Contract
+
+The API receives a structured sizing request.
+
+Example:
+
+```json
+{
+  "project": {
+    "name": "Enterprise AI Platform",
+    "industry": "Financial Services",
+    "country": "India",
+    "planning_period_years": 5,
+    "currency": "INR",
+    "pricing_basis": "BUDGETARY"
+  },
+
+  "users": {
+    "total_users": 10000,
+    "peak_concurrent_sessions": 1500,
+    "peak_usage_window": "09:00-18:00",
+    "working_days_per_year": 250,
+    "transactions_per_user_per_day": 8,
+    "annual_workload_growth_pct": 20,
+    "annual_data_growth_pct": 20
+  },
+
+  "use_cases": [
+    {
+      "use_case_code": "CONVERSATIONAL_AI",
+      "selected": true,
+      "complexity": "MEDIUM",
+      "applicable_users_pct": 50,
+      "approx_users": null
+    }
+  ],
+
+  "data": {
+    "raw_data_tb": 100,
+    "retention_years": 5,
+    "residency": "COUNTRY_RESTRICTED",
+    "classification": "CONFIDENTIAL",
+    "backup_retention_days": 90,
+    "archive_required": true
+  },
+
+  "model_selection": {
+    "strategy": "BOTH",
+    "optimization_goal": "BALANCED",
+    "auto_model_routing": true,
+    "fallback_models": true,
+    "external_api_for_sensitive_data": false,
+    "max_on_prem_models_loaded": "AUTO",
+    "allow_model_override": true
+  },
+
+  "availability": {
+    "target": "99.95",
+    "production_window": "24X7",
+    "ha_required": true,
+    "dr_required": true,
+    "dr_mode": "ACTIVE_PASSIVE",
+    "rto_hours": 4,
+    "rpo": "15M",
+    "dr_compute_capacity_pct": "AUTO"
+  },
+
+  "deployment_modes": [
+    "ON_PREM",
+    "CLOUD",
+    "HYBRID"
+  ]
+}
+```
+
+---
+
+# 33. Internal Calculation Contract
+
+The engine must use explicit typed structures.
+
+Conceptually:
+
+```python
+class SizingRequest:
+    project: ProjectInput
+    users: UserDemandInput
+    use_cases: list[UseCaseInput]
+    data_profile: DataProfile
+    training_profile: TrainingProfile | None
+    model_selection: ModelSelection
+    availability: AvailabilityRequirements
+    deployment_modes: list[DeploymentMode]
+```
+
+The engine returns:
+
+```python
+class SizingResponse:
+    calculation_run: CalculationMetadata
+    workload: WorkloadResult
+    models: ModelResult
+    capacity: CapacityResult
+    topology: TopologyResult
+    availability: AvailabilityResult
+    growth: GrowthResult
+    bom: BOMResult
+    costs: CostResult
+    tco: TCOResult
+    comparison: ComparisonResult
+    lineage: LineageResult
+    confidence: ConfidenceResult
+    warnings: list[Warning]
+```
+
+---
+
+# 34. Calculation Pipeline
+
+The pipeline is immutable and ordered.
+
+```text
+1. Validate
+      ↓
+2. Normalize
+      ↓
+3. Calculate Workload
+      ↓
+4. Select / Recommend Models
+      ↓
+5. Calculate Model Capacity
+      ↓
+6. Calculate CPU/RAM/Storage/Network
+      ↓
+7. Build Physical Topology
+      ↓
+8. Apply HA
+      ↓
+9. Apply DR
+      ↓
+10. Apply Growth
+      ↓
+11. Apply Spares
+      ↓
+12. Generate BOM
+      ↓
+13. Apply Pricing
+      ↓
+14. Calculate OPEX
+      ↓
+15. Calculate TCO
+      ↓
+16. Calculate Confidence
+      ↓
+17. Generate Lineage
+      ↓
+18. Generate Comparison
+      ↓
+19. Generate Report
+```
+
+---
+
+# 35. Validation Contract
+
+Validation produces:
+
+```json
+{
+  "valid": true,
+  "errors": [],
+  "warnings": [
+    {
+      "code": "DATA_COMPOSITION_BELOW_100",
+      "message": "Data composition totals 92%; remaining 8% classified as Other/Unclassified."
+    }
+  ]
+}
+```
+
+Validation distinguishes:
+
+```text
+ERROR
+WARNING
+INFO
+```
+
+Errors block calculation.
+
+Warnings do not necessarily block calculation.
+
+---
+
+# 36. Effective User Calculation
+
+For every use case:
+
+```text
+If Approx Users exists:
+
+    Effective Users = Approx Users
+
+Else:
+
+    Effective Users =
+        Total Users × Applicable Users %
+```
+
+The system retains both:
+
+```text
+percentage-derived users
+user-supplied approximate users
+```
+
+If they materially differ:
+
+```text
+WARNING: USER_OVERRIDE_DEVIATION
+```
+
+---
+
+# 37. Daily Transaction Contract
+
+```text
+Daily Transactions
+=
+Active Users × Transactions per User per Day
+```
+
+For use case `u`:
+
+```text
+DailyTransactions[u]
+=
+EffectiveUsers[u]
+× TransactionsPerUserPerDay[u]
+```
+
+---
+
+# 38. Peak Concurrency Distribution
+
+Do NOT distribute concurrent sessions evenly.
+
+```text
+DistributionWeight[u]
+=
+EffectiveUsers[u]
+× UsageIntensityFactor[u]
+```
+
+Then:
+
+```text
+PeakConcurrentRequests[u]
+=
+PeakConcurrentSessions
+× DistributionWeight[u]
+/
+Σ DistributionWeight
+```
+
+The intensity factor comes from the assumption/use-case catalog.
+
+---
+
+# 39. Complexity
+
+Complexity affects compute intensity, not directly user concurrency.
+
+Initial governed values:
+
+```text
+SIMPLE = 1.0
+MEDIUM = 1.5
+STRONG = 2.5
+```
+
+Formula:
+
+```text
+AdjustedComputeLoad
+=
+BaseComputeLoad
+× ComplexityMultiplier
+```
+
+---
+
+# 40. Agentic Workloads
+
+Agentic workloads require additional execution steps.
+
+```text
+AgenticComputeLoad
+=
+BaseRequestLoad
+× AgenticStepMultiplier
+```
+
+The multiplier must be configurable.
+
+Example:
+
+```text
+agentic_steps = 4
+
+compute_load
+=
+base_load × 4
+```
+
+The exact production assumption comes from the catalog.
+
+---
+
+# 41. RAG Workload
+
+RAG is decomposed into:
+
+```text
+Embedding
++
+Retrieval
++
+Reranking
++
+LLM Generation
+```
+
+Compute:
+
+```text
+RAG Compute
+=
+Embedding Compute
++
+Reranking Compute
++
+LLM Compute
+```
+
+Storage:
+
+```text
+RAG Storage
+=
+Raw Documents
++
+Chunks
++
+Embeddings
++
+Vector Index
++
+Metadata
++
+Model Repository
+```
+
+---
+
+# 42. Document Intelligence
+
+Document processing:
+
+```text
+Document Compute
+=
+OCR
++
+Vision/VLM
++
+LLM
++
+Storage I/O
+```
+
+Different document types can use different processing paths.
+
+---
+
+# 43. Interactive vs Batch
+
+These are separate calculation modes.
+
+## Interactive
+
+Primary metrics:
+
+```text
+RPS
+concurrency
+TTFT
+TPOT / ITL
+P95
+P99
+tokens/sec
+```
+
+## Batch
+
+Primary metrics:
+
+```text
+jobs/day
+tokens/hour
+GPU-hours
+completion deadline
+throughput
+cost/job
+```
+
+The engine must not apply an interactive latency formula to batch processing.
+
+---
+
+# 44. Model Selection Pipeline
+
+```text
+Use Case
+   ↓
+Candidate Models
+   ↓
+Capability Filter
+   ↓
+License Filter
+   ↓
+Context Filter
+   ↓
+Self-hosting Filter
+   ↓
+Data Policy Filter
+   ↓
+Performance Filter
+   ↓
+Deployment Filter
+   ↓
+Optimization Objective
+   ↓
+Recommended Models
+```
+
+The engine can return:
+
+```text
+SELECTED
+RECOMMENDED
+ALTERNATIVE
+REJECTED
+```
+
+Each recommendation must contain a reason.
+
+---
+
+# 45. GPU Memory Contract
+
+Required VRAM:
+
+```text
+Required VRAM
+=
+Model Weights
++
+KV Cache
++
+Activation Memory
++
+Runtime Overhead
++
+Communication Buffer
++
+Safety Margin
+```
+
+Model weight memory:
+
+```text
+Weight Memory
+=
+Parameter Count
+×
+Bytes per Parameter
+```
+
+GPU memory requirement:
+
+```text
+GPU Memory Count
+=
+CEILING(
+    Required VRAM /
+    Usable GPU VRAM
+)
+```
+
+---
+
+# 46. Performance GPU Requirement
+
+```text
+Performance GPUs
+=
+CEILING(
+    Required Throughput /
+    Validated Throughput Per GPU
+)
+```
+
+Then utilization:
+
+```text
+Production GPUs
+=
+CEILING(
+    Performance GPUs /
+    Target Utilization
+)
+```
+
+Final GPU requirement:
+
+```text
+GPU Requirement
+=
+MAX(
+    Memory Requirement,
+    Performance Requirement
+)
+```
+
+---
+
+# 47. Physical Server Calculation
+
+Example:
+
+```text
+Required GPUs = 48
+GPU/server = 8
+```
+
+Then:
+
+```text
+GPU Servers
+=
+CEILING(48 / 8)
+=
+6
+```
+
+But the engine must additionally validate:
+
+```text
+GPU topology
+model parallelism
+GPU interconnect
+PCIe topology
+NIC/HCA requirements
+power
+rack capacity
+supported configurations
+```
+
+A mathematical GPU count alone cannot produce a procurement BOM.
+
+---
+
+# 48. CPU Contract
+
+CPU workload consists of:
+
+```text
+preprocessing
+RAG
+OCR
+API
+database
+vector database
+monitoring
+management
+```
+
+Conceptually:
+
+```text
+Required CPU Cores
+=
+Σ CPU Workload Requirements
+/
+Target CPU Utilization
+```
+
+Then:
+
+```text
+CPU Servers
+=
+CEILING(
+    Required CPU Cores /
+    Usable CPU Cores per Server
+)
+```
+
+---
+
+# 49. RAM Contract
+
+```text
+Required RAM
+=
+Application RAM
++
+Database RAM
++
+Vector DB RAM
++
+Cache
++
+Kubernetes
++
+Model Serving
++
+OS
++
+Headroom
+```
+
+Each component should have its own calculation lineage.
+
+---
+
+# 50. Storage Contract
+
+Future data:
+
+```text
+Future Data
+=
+Raw Data
+×
+(1 + Annual Data Growth)^Years
+```
+
+Total storage:
+
+```text
+Total Storage
+=
+Primary
++
+Working
++
+Model Repository
++
+Vector
++
+Backup
++
+Archive
++
+DR
+```
+
+The system distinguishes:
+
+```text
+RAW
+USABLE
+PROVISIONED
+```
+
+and accounts for:
+
+```text
+RAID
+erasure coding
+filesystem overhead
+replication
+snapshots
+headroom
+```
+
+---
+
+# 51. Network Contract
+
+Network calculation is divided into:
+
+```text
+User/API Network
+Storage Network
+Management Network
+Kubernetes Network
+WAN
+GPU Fabric
+```
+
+GPU fabric is independently calculated when required for:
+
+```text
+distributed inference
+tensor parallelism
+pipeline parallelism
+training
+fine-tuning
+```
+
+---
+
+# 52. HA Contract
+
+The engine must not blindly multiply infrastructure by two.
+
+Supported architecture patterns:
+
+```text
+N+1
+N+2
+ACTIVE_PASSIVE
+ACTIVE_ACTIVE
+SHARED_DR
+CLOUD_BURST
+```
+
+The required architecture depends on availability requirements.
+
+---
+
+# 53. DR Contract
+
+DR inputs:
+
+```text
+RTO
+RPO
+DR mode
+DR capacity percentage
+```
+
+Example:
+
+```text
+Production GPUs = 48
+DR capacity = 50%
+
+DR GPUs =
+CEILING(48 × 0.50)
+=
+24
+```
+
+DR may be:
+
+```text
+backup only
+active/passive
+active/active
+cloud DR
+shared capacity
+```
+
+---
+
+# 54. Growth Contract
+
+For annual growth `g`:
+
+```text
+Year 1 = Baseline
+
+Year 2 = Baseline × (1 + g)
+
+Year 3 = Baseline × (1 + g)^2
+
+Year 4 = Baseline × (1 + g)^3
+
+Year 5 = Baseline × (1 + g)^4
+```
+
+For 20% growth:
+
+```text
+Y1 = 100%
+Y2 = 120%
+Y3 = 144%
+Y4 = 173%
+Y5 = 207%
+```
+
+The initial procurement does not automatically purchase all five years of capacity.
+
+The BOM distinguishes:
+
+```text
+Initial
+Expansion
+Future
+```
+
+---
+
+# 55. BOM Contract
+
+For each component:
+
+```text
+Total Qty
+=
+Production
++
+HA
++
+DR
++
+Growth
++
+Spare
+```
+
+Each BOM line retains the reason for its quantity.
+
+Example:
+
+```json
+{
+  "component": "8-GPU Server",
+  "production_qty": 6,
+  "ha_qty": 1,
+  "dr_qty": 3,
+  "growth_qty": 2,
+  "spare_qty": 1,
+  "total_qty": 13
+}
+```
+
+The engine must be able to explain every quantity.
+
+---
+
+# 56. On-Prem Cost Contract
+
+```text
+CAPEX
+=
+Hardware
++
+Software
++
+Implementation
++
+Facility
+```
+
+Annual OPEX:
+
+```text
+OPEX
+=
+Support
++
+Maintenance
++
+Power
++
+Cooling
++
+Software
++
+Operations
+```
+
+---
+
+# 57. Cloud Cost Contract
+
+Cloud cost includes:
+
+```text
+GPU compute
+CPU compute
+Kubernetes
+managed model inference
+provisioned throughput
+embedding
+reranking
+OCR
+speech
+image generation
+batch
+object storage
+block storage
+file storage
+vector DB
+relational DB
+cache
+backup
+snapshots
+network
+egress
+inter-region transfer
+private connectivity
+load balancer
+firewall
+DR
+```
+
+Example:
+
+```text
+GPU Cost
+=
+GPU Instance Hours
+×
+Price per Hour
+```
+
+API:
+
+```text
+API Cost
+=
+Input Tokens × Input Price
++
+Output Tokens × Output Price
+```
+
+---
+
+# 58. Hybrid Cost Contract
+
+Hybrid is not:
+
+```text
+On-Prem Cost + Cloud Cost
+```
+
+It includes:
+
+```text
+On-Prem infrastructure
++
+Cloud infrastructure
++
+Cloud burst
++
+Managed AI services
++
+Connectivity
++
+Data transfer
++
+Integration
++
+Operations
++
+DR
+```
+
+---
+
+# 59. TCO Contract
+
+3-year:
+
+```text
+3-Year TCO
+=
+CAPEX
++
+Year1 OPEX
++
+Year2 OPEX
++
+Year3 OPEX
+```
+
+5-year:
+
+```text
+5-Year TCO
+=
+CAPEX
++
+Year1 OPEX
++
+Year2 OPEX
++
+Year3 OPEX
++
+Year4 OPEX
++
+Year5 OPEX
+```
+
+Cloud consumption must be recalculated against annual workload/data growth.
+
+The system must NOT calculate:
+
+```text
+Year1 × 5
+```
+
+as the 5-year TCO.
+
+---
+
+# 60. Confidence Contract
+
+Confidence is attached to individual calculations.
+
+```text
+HIGH
+MEDIUM
+LOW
+UNVERIFIED
+```
+
+Example:
+
+```json
+{
+  "metric": "production_gpu_count",
+  "value": 48,
+  "confidence": "MEDIUM",
+  "reasons": [
+    "GPU specifications: HIGH",
+    "Benchmark: MEDIUM",
+    "Workload assumption: MEDIUM"
+  ]
+}
+```
+
+Confidence propagation follows the weakest material dependency.
+
+A calculation cannot be labelled HIGH merely because the arithmetic is deterministic if a critical benchmark or workload assumption is LOW confidence.
+
+---
+
+# 61. Sensitivity Analysis
+
+V1 should support sensitivity variables such as:
+
+```text
+Users
+Peak concurrency
+Transactions/user/day
+Input tokens
+Output tokens
+Growth
+GPU utilization
+Benchmark throughput
+Data growth
+DR capacity
+```
+
+Example:
+
+```text
+GPU count at:
+
+-10% workload
+Baseline
++10%
++20%
++30%
+```
+
+This is particularly important because infrastructure sizing uncertainty is usually driven by assumptions and benchmark applicability rather than arithmetic.
+
+---
+
+# 62. Calculation Lineage
+
+Every significant output must have:
+
+```text
+Metric
+Value
+Unit
+Formula
+Inputs
+Catalog records
+Evidence
+Calculation version
+Confidence
+```
+
+Example:
+
+```text
+production_gpu_count
+        │
+        ├── workload requirement
+        ├── selected model
+        ├── GPU
+        ├── benchmark
+        ├── utilization assumption
+        ├── growth
+        └── HA/DR architecture
+```
+
+The UI should eventually allow the user to click:
+
+```text
+48 GPUs
+```
+
+and inspect:
+
+```text
+Why 48?
+```
+
+---
+
+# 63. Calculation Versioning
+
+Every completed calculation records:
+
+```text
+Input Version
+Calculation Engine Version
+Model Catalog Version
+GPU Catalog Version
+Server Catalog Version
+Cloud Catalog Version
+Benchmark Version
+Assumption Version
+Pricing Version
+```
+
+Therefore:
+
+```text
+Calculation A
+```
+
+can be reproduced months later even after catalogs change.
+
+---
+
+# 64. API Contract
+
+Base:
+
+```text
+/api/v1
+```
+
+Authentication:
+
+```text
+POST /auth/login
+POST /auth/logout
+GET  /auth/me
+```
+
+Projects:
+
+```text
+GET    /projects
+POST   /projects
+GET    /projects/{id}
+PUT    /projects/{id}
+DELETE /projects/{id}
+```
+
+Inputs:
+
+```text
+GET  /projects/{id}/inputs
+POST /projects/{id}/inputs
+GET  /projects/{id}/inputs/{version}
+```
+
+Sizing:
+
+```text
+POST /projects/{id}/calculate
+GET  /projects/{id}/calculations
+GET  /calculations/{id}
+GET  /calculations/{id}/lineage
+```
+
+Results:
+
+```text
+GET /calculations/{id}/workload
+GET /calculations/{id}/models
+GET /calculations/{id}/capacity
+GET /calculations/{id}/topology
+GET /calculations/{id}/bom
+GET /calculations/{id}/cost
+GET /calculations/{id}/tco
+GET /calculations/{id}/comparison
+```
+
+Reports:
+
+```text
+POST /calculations/{id}/reports
+GET  /reports/{id}
+```
+
+---
+
+# 65. Catalog API
+
+Read access:
+
+```text
+GET /catalogs/use-cases
+GET /catalogs/models
+GET /catalogs/gpus
+GET /catalogs/servers
+GET /catalogs/cloud
+GET /catalogs/benchmarks
+GET /catalogs/pricing
+GET /catalogs/assumptions
+GET /catalogs/evidence
+```
+
+Admin-only write access:
+
+```text
+POST   /catalogs/*
+PUT    /catalogs/{id}
+PATCH  /catalogs/{id}
+DELETE /catalogs/{id}
+```
+
+Deletion should generally mean:
+
+```text
+ARCHIVED / INACTIVE
+```
+
+rather than physically deleting records referenced by calculations.
+
+---
+
+# 66. API Error Contract
+
+All APIs return structured errors.
+
+Example:
+
+```json
+{
+  "error": {
+    "code": "INVALID_INPUT",
+    "message": "Peak concurrent sessions cannot exceed total users.",
+    "field": "users.peak_concurrent_sessions",
+    "severity": "ERROR"
+  }
+}
+```
+
+Possible error codes:
+
+```text
+INVALID_INPUT
+CATALOG_NOT_FOUND
+CATALOG_VERSION_NOT_FOUND
+BENCHMARK_NOT_FOUND
+NO_VALID_MODEL
+NO_VALID_HARDWARE
+UNSUPPORTED_TOPOLOGY
+PRICING_NOT_AVAILABLE
+CALCULATION_FAILED
+UNAUTHORIZED
+FORBIDDEN
+REPORT_GENERATION_FAILED
+```
+
+---
+
+# 67. Calculation Engine Interface
+
+The engine should expose one primary entry point:
+
+```python
+result = sizing_engine.calculate(
+    request=request,
+    catalog_snapshot=catalog_snapshot
+)
+```
+
+Where:
+
+```python
+catalog_snapshot
+```
+
+is immutable for that calculation.
+
+Conceptually:
+
+```python
+@dataclass
+class CatalogSnapshot:
+    models: ModelCatalog
+    gpus: GPUCatalog
+    servers: ServerCatalog
+    cloud: CloudCatalog
+    benchmarks: BenchmarkCatalog
+    pricing: PricingCatalog
+    assumptions: AssumptionCatalog
+    evidence: EvidenceRepository
+```
+
+This prevents a calculation from accidentally seeing different catalog versions halfway through execution.
+
+---
+
+# 68. Engine Pipeline Interface
+
+```python
+class CalculationStage(Protocol):
+
+    def execute(
+        self,
+        context: CalculationContext
+    ) -> CalculationContext:
+        ...
+```
+
+Stages:
+
+```text
+ValidationStage
+NormalizationStage
+WorkloadStage
+ModelSelectionStage
+CapacityStage
+InfrastructureStage
+AvailabilityStage
+GrowthStage
+BOMStage
+CostStage
+TCOStage
+ConfidenceStage
+LineageStage
+ComparisonStage
+```
+
+---
+
+# 69. Calculation Context
+
+```python
+class CalculationContext:
+
+    request
+    normalized_input
+
+    workload
+    selected_models
+    capacity
+    infrastructure
+    availability
+    growth
+    bom
+    costs
+    tco
+    comparison
+
+    warnings
+    errors
+
+    lineage
+    confidence
+
+    catalog_snapshot
+    calculation_metadata
+```
+
+Each stage reads the relevant inputs and writes its own output.
+
+---
+
+# 70. No Hidden State
+
+Calculation stages must not depend on:
+
+```text
+global variables
+database state changing during calculation
+frontend state
+random values
+current pricing without versioning
+current benchmark without versioning
+```
+
+All required data enters through the calculation context/catalog snapshot.
+
+---
+
+# 71. Database Transaction Model
+
+Starting a calculation:
+
+```text
+BEGIN
+    resolve input version
+    resolve catalog versions
+    create calculation_run
+    create immutable catalog snapshot references
+COMMIT
+```
+
+The engine then calculates against those versions.
+
+Final result:
+
+```text
+BEGIN
+    persist results
+    persist lineage
+    persist BOM
+    persist costs
+    persist confidence
+    mark calculation COMPLETE
+COMMIT
+```
+
+---
+
+# 72. Catalog Lifecycle
+
+Every catalog record has:
+
+```text
+DRAFT
+ACTIVE
+SUPERSEDED
+ARCHIVED
+```
+
+Example:
+
+```text
+H100 Configuration v1
+       ↓
+H100 Configuration v2
+       ↓
+v1 = SUPERSEDED
+v2 = ACTIVE
+```
+
+Historical calculations continue referencing v1.
+
+---
+
+# 73. Evidence Lifecycle
+
+Evidence should be linked to catalog records.
+
+Example:
+
+```text
+Server
+  ↓
+Specification
+  ↓
+Evidence
+  ↓
+Manufacturer document
+```
+
+or:
+
+```text
+Model
+  ↓
+Benchmark
+  ↓
+Evidence
+  ↓
+Benchmark source
+```
+
+---
+
+# 74. Frontend Application Structure
+
+Main navigation:
+
+```text
+Dashboard
+Projects
+New Sizing
+Results
+Reports
+
+ADMIN
+  Models
+  GPUs
+  Servers
+  Cloud
+  Benchmarks
+  Pricing
+  Assumptions
+  Use Cases
+  Evidence
+  Users
+  Audit
+```
+
+Normal users must not see editable admin functionality.
+
+Backend authorization still applies.
+
+---
+
+# 75. Sizing Wizard
+
+The wizard follows the calculation dependency order.
+
+```text
+1. Project
+2. Users & Demand
+3. Use Cases
+4. Data
+5. Training/Fine-Tuning
+6. Models
+7. Availability / HA / DR
+8. Deployment
+9. Review
+10. Calculate
+```
+
+The system should show:
+
+```text
+Required
+Optional
+Defaulted
+Derived
+Warning
+```
+
+rather than hiding assumptions.
+
+---
+
+# 76. Results Dashboard
+
+The result page should contain:
+
+```text
+Executive Summary
+
+Workload
+Models
+GPU Capacity
+CPU/RAM
+Storage
+Networking
+Topology
+HA/DR
+Growth
+
+On-Prem
+Cloud
+Hybrid
+
+BOM
+Cost
+TCO
+
+Confidence
+Warnings
+Calculation Lineage
+```
+
+---
+
+# 77. Executive Summary Example
+
+```text
+Recommended Production Architecture
+
+Deployment:
+Hybrid
+
+Production GPU:
+48
+
+HA GPU:
+8
+
+DR GPU:
+24
+
+Total Procurement GPU:
+80
+
+GPU Servers:
+10
+
+CPU Servers:
+6
+
+Primary Storage:
+500 TB usable
+
+DR Storage:
+300 TB usable
+
+5-Year TCO:
+₹X
+
+Overall Confidence:
+MEDIUM
+```
+
+The numbers above are illustrative only; the actual application will derive them.
+
+---
+
+# 78. Report Package
+
+Every final report should contain:
+
+## PDF
+
+```text
+Executive Summary
+Requirements
+Workload
+Model Selection
+Infrastructure
+Topology
+HA/DR
+BOM
+Cost
+TCO
+Comparison
+Assumptions
+Evidence
+Confidence
+Calculation Lineage
+```
+
+## Excel
+
+Sheets:
+
+```text
+Executive
+Inputs
+Workload
+Models
+GPU Capacity
+CPU RAM
+Storage
+Network
+Topology
+HA DR
+Growth
+BOM
+Pricing
+OPEX
+TCO
+Comparison
+Assumptions
+Evidence
+Lineage
+```
+
+## JSON
+
+Complete machine-readable calculation package:
+
+```json
+{
+  "project": {},
+  "input": {},
+  "catalog_versions": {},
+  "workload": {},
+  "models": {},
+  "capacity": {},
+  "topology": {},
+  "ha_dr": {},
+  "growth": {},
+  "bom": {},
+  "cost": {},
+  "tco": {},
+  "comparison": {},
+  "confidence": {},
+  "warnings": {},
+  "lineage": {}
+}
+```
+
+---
+
+# 79. Testing Architecture
+
+Testing is a first-class component.
+
+## Unit tests
+
+Every formula receives unit tests.
+
+Example:
+
+```text
+test_weight_memory()
+test_gpu_memory_requirement()
+test_performance_gpu_count()
+test_peak_concurrency_distribution()
+test_growth_projection()
+test_storage_projection()
+test_tco()
+```
+
+---
+
+# 80. Calculation Test Vectors
+
+A known input must produce a known output.
+
+Example:
+
+```text
+Input:
+10,000 users
+1,500 concurrency
+20% annual growth
+specific model
+specific GPU
+specific benchmark
+```
+
+Expected:
+
+```text
+GPU count = X
+servers = Y
+storage = Z
+```
+
+If a formula changes intentionally, the test vector must be updated through an explicit engineering change.
+
+---
+
+# 81. Reproducibility Test
+
+The system must support:
+
+```text
+Calculation A
+       ↓
+same input
+same catalogs
+same versions
+       ↓
+Calculation B
+```
+
+Expected:
+
+```text
+A == B
+```
+
+except for non-deterministic metadata such as timestamps.
+
+---
+
+# 82. Catalog Validation
+
+Before catalogs can become ACTIVE:
+
+```text
+schema validation
+required fields
+duplicate detection
+unit validation
+range validation
+evidence validation
+version validation
+pricing validation
+benchmark applicability
+```
+
+Example:
+
+```text
+GPU memory = -80 GB
+```
+
+must fail validation.
+
+---
+
+# 83. Security Requirements
+
+Passwords:
+
+```text
+Argon2id or bcrypt
+```
+
+Never store plaintext passwords.
+
+API:
+
+```text
+authentication required
+RBAC required
+admin endpoints protected
+input validation
+parameterized database queries
+secure headers
+CSRF protection where applicable
+rate limiting before public deployment
+```
+
+Secrets:
+
+```text
+.env
+```
+
+for local development only.
+
+Never commit secrets.
+
+---
+
+# 84. Audit Requirements
+
+The system records:
+
+```text
+who
+did what
+when
+to which object
+before
+after
+```
+
+Especially:
+
+```text
+catalog edits
+benchmark edits
+pricing edits
+assumption edits
+evidence edits
+user changes
+calculation execution
+report generation
+```
+
+---
+
+# 85. Important Engineering Rule
+
+The LLM is **not** the authoritative sizing calculator.
+
+If an LLM is added later, its role can be:
+
+```text
+Explain
+Summarize
+Answer questions about results
+Generate narrative
+Highlight assumptions
+```
+
+It must not independently decide:
+
+```text
+GPU quantity
+server quantity
+BOM quantity
+TCO
+```
+
+Those come from the deterministic engine.
+
+---
+
+# 86. V1 Acceptance Criteria
+
+V1 is considered functionally complete when:
+
+### Application
+
+```text
+[ ] User can log in
+[ ] Admin can log in
+[ ] RBAC works
+[ ] User can create project
+[ ] User can complete sizing wizard
+[ ] User can calculate
+[ ] User can view results
+[ ] User can generate reports
+```
+
+### Engine
+
+```text
+[ ] Workload calculation
+[ ] Model selection
+[ ] GPU memory sizing
+[ ] Performance sizing
+[ ] CPU sizing
+[ ] RAM sizing
+[ ] Storage sizing
+[ ] Network sizing
+[ ] Topology
+[ ] HA
+[ ] DR
+[ ] Growth
+[ ] BOM
+[ ] Pricing
+[ ] OPEX
+[ ] TCO
+[ ] Comparison
+[ ] Confidence
+[ ] Lineage
+```
+
+### Catalogs
+
+```text
+[ ] ≥15 use cases
+[ ] ≥10 free/self-hosted models
+[ ] ≥10 paid/hosted models
+[ ] ≥10 Dell configurations
+[ ] ≥10 HPE configurations
+[ ] ≥20 AWS/Azure/GCP configurations
+```
+
+### Governance
+
+```text
+[ ] Evidence linked
+[ ] Catalog versioning
+[ ] Calculation versioning
+[ ] Audit trail
+[ ] Reproducibility
+```
+
+### Reports
+
+```text
+[ ] PDF
+[ ] Excel
+[ ] JSON
+```
+
+### Testing
+
+```text
+[ ] Unit tests
+[ ] Integration tests
+[ ] API tests
+[ ] Calculation test vectors
+[ ] End-to-end UI tests
+[ ] Reproducibility tests
+```
+
+---
+
+# 87. Initial Build Milestones
+
+We should implement V1 in these exact milestones.
+
+## Milestone 1 — Repository + Infrastructure
+
+```text
+Git
+Docker Compose
+PostgreSQL
+FastAPI
+Next.js
+environment configuration
+health checks
+```
+
+## Milestone 2 — Identity
+
+```text
+users
+roles
+login
+password hashing
+RBAC
+Admin/User
+```
+
+## Milestone 3 — Database
+
+Implement:
+
+```text
+projects
+inputs
+catalogs
+evidence
+calculations
+lineage
+BOM
+reports
+audit
+```
+
+## Milestone 4 — Catalog Framework
+
+Build the generic catalog framework before entering all catalog records.
+
+```text
+CRUD
+versioning
+validation
+activation
+archiving
+evidence association
+audit
+```
+
+## Milestone 5 — Calculation Engine
+
+Build the deterministic engine independently of the UI.
+
+```text
+validation
+workload
+models
+capacity
+topology
+HA/DR
+growth
+BOM
+cost
+TCO
+confidence
+lineage
+```
+
+## Milestone 6 — Seed Catalog
+
+Populate the V1 minimum catalog.
+
+## Milestone 7 — API
+
+Expose calculation engine through FastAPI.
+
+## Milestone 8 — UI
+
+Build the sizing wizard and results dashboard.
+
+## Milestone 9 — Reports
+
+Implement:
+
+```text
+PDF
+Excel
+JSON
+```
+
+## Milestone 10 — Test and Harden
+
+Run the complete test suite.
+
+---
+
+# 88. Definition of Done
+
+A feature is not considered complete merely because it works on screen.
+
+For each feature:
+
+```text
+Domain logic
+    ↓
+Unit tests
+    ↓
+Database persistence
+    ↓
+API
+    ↓
+Authorization
+    ↓
+Frontend
+    ↓
+Integration test
+    ↓
+Audit/lineage
+    ↓
+Documentation
+```
+
+must be addressed where applicable.
+
+---
+
+# 89. Final V1 Architecture
+
+The complete system is therefore:
+
+```text
+                         USERS
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │   Next.js   │
+                    │     UI      │
+                    └──────┬──────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │   FastAPI   │
+                    │     API     │
+                    └──────┬──────┘
+                           │
+        ┌──────────────────┼──────────────────┐
+        │                  │                  │
+        ▼                  ▼                  ▼
+     Identity          Projects           Catalogs
+        │                  │                  │
+        └──────────────────┼──────────────────┘
+                           ▼
+                  ┌─────────────────┐
+                  │ SIZING ENGINE   │
+                  ├─────────────────┤
+                  │ Validation      │
+                  │ Workload        │
+                  │ Model           │
+                  │ Capacity        │
+                  │ Topology        │
+                  │ HA / DR         │
+                  │ Growth          │
+                  │ BOM             │
+                  │ Cost            │
+                  │ TCO             │
+                  │ Comparison      │
+                  │ Confidence      │
+                  │ Lineage         │
+                  └────────┬────────┘
+                           │
+             ┌─────────────┼──────────────┐
+             ▼             ▼              ▼
+          ON-PREM        CLOUD          HYBRID
+             │             │              │
+             └─────────────┼──────────────┘
+                           ▼
+                    ┌─────────────┐
+                    │ PostgreSQL  │
+                    └─────────────┘
+```
+
+The critical architectural separation is:
+
+```text
+USER REQUIREMENT
+       ↓
+WORKLOAD
+       ↓
+MODEL
+       ↓
+CAPACITY
+       ↓
+PHYSICAL/CLOUD TOPOLOGY
+       ↓
+HA/DR/GROWTH
+       ↓
+BOM
+       ↓
+PRICE
+       ↓
+TCO
+       ↓
+REPORT
+```
+
+That dependency chain is the backbone of the entire product.
+
+# 90. Engineering Baseline
+
+From this point forward, implementation should treat the following as fixed V1 constraints:
+
+```text
+Windows 11 local development
+Docker-based local environment
+Modular monolith
+Next.js frontend
+FastAPI backend
+Python calculation engine
+PostgreSQL
+Local authentication
+ADMIN + USER roles
+Admin-only catalog editing
+On-Prem + Cloud + Hybrid
+AWS + Azure + GCP
+Dell + HPE
+Evidence-backed catalogs
+Versioned calculations
+Deterministic calculations
+Calculation lineage
+Confidence propagation
+PDF + Excel + JSON
+Automated testing
+```
+
+The architecture intentionally leaves room for later:
+
+```text
+OIDC / SSO
+Redis
+background workers
+object storage
+external integrations
+cloud deployment
+Kubernetes
+multi-tenant SaaS
+```
+
+without requiring us to redesign the sizing engine.
